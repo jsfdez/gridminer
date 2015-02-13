@@ -1,4 +1,4 @@
-TARGET = xgine
+TARGET = gridminer
 
 CONFIG(debug, debug|release) {
     DESTDIR = ../debug
@@ -7,3 +7,5 @@ CONFIG(debug, debug|release) {
     DESTDIR = ../release
     LIBS += ../release/libsdl2.lib
 }
+
+SOURCES += main.cpp
