@@ -16,3 +16,4 @@ Makefile
 *.sdf
 *.suo
 *.exe
+*.exp
