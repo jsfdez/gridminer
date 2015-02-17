@@ -40,15 +40,27 @@ Game::Status Game::Update(const SDL_Event& event, SDL_Surface& surface)
 				image->format->Gmask, 
 				image->format->Bmask, 
 				image->format->Amask));
-			SDL_BlitSurface(image.get(), nullptr, copy.get(), nullptr);
+			//SDL_memset(copy->pixels, 0xFF, copy->w * copy->h * 4);
 			if (copy)
 			{
-				auto size = copy->w * copy->h;
+				std::uint32_t size = copy->w * copy->h * 4;
 				for (decltype(size) i = 0; i < size; i += 4)
 				{
-					auto pixel = static_cast<std::uint32_t*>(copy->pixels)[i];
-					auto rgba = reinterpret_cast<std::uint8_t*>(&pixel);
+					const auto s = static_cast<std::uint32_t*>(
+						image->pixels)[i];
+					auto& d = static_cast<std::uint32_t*>(copy->pixels)[i];
+					//if (s & 0x000000FF)
+					{
+						d = std::numeric_limits<decltype(d)>::max();
+						//d = s	& 0xFF000000;
+						//d += s	& 0x00FF0000;
+						//d += s	& 0x0000FF00;
+						//d += s	& 0x000000FF;
+					}
 					//rgba[0] = 0xFF;
+					//rgba[1] = 0xFF;
+					//rgba[2] = 0xFF;
+					//rgba[3] = 0xFF;
 				}
 			}
 			SDL_BlitSurface(copy.get(), nullptr, &surface, &rect);
