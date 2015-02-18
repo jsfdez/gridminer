@@ -40,27 +40,35 @@ Game::Status Game::Update(const SDL_Event& event, SDL_Surface& surface)
 				image->format->Gmask, 
 				image->format->Bmask, 
 				image->format->Amask));
-			//SDL_memset(copy->pixels, 0xFF, copy->w * copy->h * 4);
 			if (copy)
 			{
-				std::uint32_t size = copy->w * copy->h * 4;
-				for (decltype(size) i = 0; i < size; i += 4)
+				auto d = reinterpret_cast<std::uint32_t*>(copy->pixels);
+				const auto s = reinterpret_cast<std::uint32_t*>(image->pixels);
+				std::uint32_t size = copy->w * copy->h;
+				for (auto i = 0u; i < size; ++i)
 				{
-					const auto s = static_cast<std::uint32_t*>(
-						image->pixels)[i];
-					auto& d = static_cast<std::uint32_t*>(copy->pixels)[i];
-					//if (s & 0x000000FF)
+					if (s[i] & copy->format->Amask)
 					{
-						d = std::numeric_limits<decltype(d)>::max();
-						//d = s	& 0xFF000000;
-						//d += s	& 0x00FF0000;
-						//d += s	& 0x0000FF00;
-						//d += s	& 0x000000FF;
+						auto r = (s[i] & copy->format->Rmask) 
+							>> copy->format->Rshift;
+						auto g = (s[i] & copy->format->Gmask) 
+							>> copy->format->Gshift;
+						auto b = (s[i] & copy->format->Bmask) 
+							>> copy->format->Bshift;
+						auto a = (s[i] & copy->format->Amask)
+							>> copy->format->Ashift;
+						r = (r + 0x80 > 0xFF) ? 0xff : r + 0x80;
+						g = (g + 0x80 > 0xFF) ? 0xff : g + 0x80;
+						b = (b + 0x80 > 0xFF) ? 0xff : b + 0x80;
+						d[i] = (r << copy->format->Rshift)
+							+ (g << copy->format->Gshift)
+							+ (b << copy->format->Bshift)
+							+ (a << copy->format->Ashift);
 					}
-					//rgba[0] = 0xFF;
-					//rgba[1] = 0xFF;
-					//rgba[2] = 0xFF;
-					//rgba[3] = 0xFF;
+					else
+					{
+						d[i] = s[i];
+					}
 				}
 			}
 			SDL_BlitSurface(copy.get(), nullptr, &surface, &rect);
