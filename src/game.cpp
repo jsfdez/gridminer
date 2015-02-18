@@ -16,29 +16,34 @@ Game::~Game()
 	Destroy();
 }
 
-Game::Status Game::Update(const SDL_Event& event, SDL_Surface& surface)
+Game::Status Game::Update(const SDL_Event& /*event*/)
+{
+	auto status = Status::CONTINUE;
+    return status;
+}
+
+void Game::Render(SDL_Surface& surface)
 {
 	const auto offsetX = 330u;
 	const auto offsetY = 100u;
 	const auto w = 42u;
 	const auto h = 42u;
 	const auto columns = static_cast<std::size_t>(std::sqrt(m_gridData.size()));
-	auto status = Status::CONTINUE;
-    SDL_BlitSurface(m_background.get(), nullptr, &surface, nullptr);
+	SDL_BlitSurface(m_background.get(), nullptr, &surface, nullptr);
 	for (decltype(m_gridData.size()) i = 0; i < m_gridData.size(); ++i)
 	{
-		SDL_Rect rect{ offsetX + w * (i % columns), 
+		SDL_Rect rect{ offsetX + w * (i % columns),
 			offsetY + h * (i / columns), w, h };
 		auto image = m_gems[m_gridData[i]];
-		if (event.type == SDL_MOUSEBUTTONDOWN)
+		//if (event.type == SDL_MOUSEBUTTONDOWN)
 		{
 			std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> copy(
 				nullptr, SDL_FreeSurface);
-			copy.reset(SDL_CreateRGBSurface(0, image->w, image->h, 
-				image->format->BitsPerPixel, 
-				image->format->Rmask, 
-				image->format->Gmask, 
-				image->format->Bmask, 
+			copy.reset(SDL_CreateRGBSurface(0, image->w, image->h,
+				image->format->BitsPerPixel,
+				image->format->Rmask,
+				image->format->Gmask,
+				image->format->Bmask,
 				image->format->Amask));
 			if (copy)
 			{
@@ -49,11 +54,11 @@ Game::Status Game::Update(const SDL_Event& event, SDL_Surface& surface)
 				{
 					if (s[i] & copy->format->Amask)
 					{
-						auto r = (s[i] & copy->format->Rmask) 
+						auto r = (s[i] & copy->format->Rmask)
 							>> copy->format->Rshift;
-						auto g = (s[i] & copy->format->Gmask) 
+						auto g = (s[i] & copy->format->Gmask)
 							>> copy->format->Gshift;
-						auto b = (s[i] & copy->format->Bmask) 
+						auto b = (s[i] & copy->format->Bmask)
 							>> copy->format->Bshift;
 						auto a = (s[i] & copy->format->Amask)
 							>> copy->format->Ashift;
@@ -73,12 +78,11 @@ Game::Status Game::Update(const SDL_Event& event, SDL_Surface& surface)
 			}
 			SDL_BlitSurface(copy.get(), nullptr, &surface, &rect);
 		}
-		else
-		{
-			SDL_BlitSurface(image.get(), nullptr, &surface, &rect);
-		}
+		//else
+		//{
+		//	SDL_BlitSurface(image.get(), nullptr, &surface, &rect);
+		//}
 	}
-    return status;
 }
 
 void Game::Create()

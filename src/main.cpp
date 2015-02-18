@@ -1,3 +1,4 @@
+#include <stack>
 #include <memory>
 #include <stdio.h>
 #include <cstdlib>
@@ -28,21 +29,31 @@ int main(int, char**)
         return EXIT_FAILURE;
     }
     auto& surface = *SDL_GetWindowSurface(window.get());
+	struct _Scenes : std::stack<std::unique_ptr<AbstractScene>>
+	{
+		AbstractScene* operator->()
+		{
+			return top().get();
+		}
+	} scenes;
 	SDL_Event event;
-	Game game;
+	scenes.emplace(new Game);
     while(true)
 	{
-		if (SDL_PollEvent(&event))
+		while (SDL_PollEvent(&event))
 		{
             if (event.type == SDL_KEYDOWN)
             {
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                 {
-                    break;
+					SDL_Quit();
+					return EXIT_SUCCESS;
                 }
             }
+			else
+				scenes->Update(event);
 		}
-		game.Update(event, surface);
+		scenes->Render(surface);
         SDL_UpdateWindowSurface(window.get());
     }
     SDL_Quit();

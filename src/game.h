@@ -26,7 +26,8 @@ public:
     Game();
     ~Game();
 
-	virtual Status Update(const SDL_Event& event, SDL_Surface& surface) override;
+	virtual Status Update(const SDL_Event& event) override;
+	virtual void Render(SDL_Surface& surface) override;
 
 	void Create();
 	void Destroy();
