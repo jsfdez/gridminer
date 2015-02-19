@@ -27,12 +27,5 @@ LIBS += ../3rdParty/libsdl2_ttf/lib/$$(PROCESSOR_ARCHITECTURE)/SDL2_ttf.lib
 INCLUDEPATH += ../3rdParty/libsdl2_image
 INCLUDEPATH += ../3rdParty/libsdl2/include
 
-SOURCES += main.cpp \
-    game.cpp \
-    imageloader.cpp
-
-HEADERS += \
-    game.h \
-    abstractscene.h \
-    files.h \
-    imageloader.h
+HEADERS += $$files(*.h)
+SOURCES += $$files(*.cpp)

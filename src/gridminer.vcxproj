@@ -75,7 +75,6 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>User32.lib;Shell32.lib;Winmm.lib;Ole32.lib;Gdi32.lib;Version.lib;Imm32.lib;OleAut32.lib;../3rdParty/libsdl2/lib/x86/SDL2.lib;../3rdParty/libsdl2/lib/x86/SDL2main.lib;../3rdParty/libsdl2_image/lib/x86/SDL2_image.lib;../3rdParty/libsdl2_ttf/lib/x86/SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>&quot;/MANIFESTDEPENDENCY:type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos; processorArchitecture=&apos;*&apos;&quot; %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -115,7 +114,6 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>User32.lib;Shell32.lib;Winmm.lib;Ole32.lib;Gdi32.lib;Version.lib;Imm32.lib;OleAut32.lib;../3rdParty/libsdl2/lib/x86/SDL2.lib;../3rdParty/libsdl2/lib/x86/SDL2main.lib;../3rdParty/libsdl2_image/lib/x86/SDL2_image.lib;../3rdParty/libsdl2_ttf/lib/x86/SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>&quot;/MANIFESTDEPENDENCY:type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos; processorArchitecture=&apos;*&apos;&quot; %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -135,15 +133,21 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="game.cpp" />
+    <ClCompile Include="abstractsurface.cpp" />
+    <ClCompile Include="gamesurface.cpp" />
+    <ClCompile Include="gemsurface.cpp" />
+    <ClCompile Include="image.cpp" />
     <ClCompile Include="imageloader.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="abstractscene.h" />
+    <ClInclude Include="abstractsurface.h" />
     <ClInclude Include="files.h" />
-    <ClInclude Include="game.h" />
+    <ClInclude Include="gamesurface.h" />
+    <ClInclude Include="gemsurface.h" />
     <ClInclude Include="imageloader.h" />
+    <ClInclude Include="position.h" />
+    <ClInclude Include="size.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

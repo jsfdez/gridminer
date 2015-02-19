@@ -4,7 +4,7 @@
 #include <cstdlib>
 
 #include "SDL.h"
-#include "game.h"
+#include "gamesurface.h"
 #include "files.h"
 #include "imageloader.h"
 
@@ -29,15 +29,15 @@ int main(int, char**)
         return EXIT_FAILURE;
     }
     auto& surface = *SDL_GetWindowSurface(window.get());
-	struct _Scenes : std::stack<std::unique_ptr<AbstractScene>>
+	struct _Scenes : std::stack<std::unique_ptr<AbstractSurface>>
 	{
-		AbstractScene* operator->()
+		AbstractSurface* operator->()
 		{
 			return top().get();
 		}
 	} scenes;
 	SDL_Event event;
-	scenes.emplace(new Game);
+	scenes.emplace(new GameSurface);
     while(true)
 	{
 		while (SDL_PollEvent(&event))

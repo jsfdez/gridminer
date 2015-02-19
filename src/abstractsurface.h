@@ -1,9 +1,11 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "SDL_events.h"
+union SDL_Event;
+struct Position;
+struct SDL_Surface;
 
-struct AbstractScene
+struct AbstractSurface
 {
 	enum class Status
 	{
@@ -13,6 +15,7 @@ struct AbstractScene
 
 	virtual Status Update(const SDL_Event& event) = 0;
 	virtual void Render(SDL_Surface& surface) = 0;
+	virtual bool Contains(const Position& position) const = 0;
 };
 
 #endif // SCENE_H
