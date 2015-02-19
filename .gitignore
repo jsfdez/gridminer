@@ -7,7 +7,6 @@ Makefile.*
 *.lib
 *.pdb
 *.ilk
-*.user
 src/Makefile
 Makefile
 *.tlog
