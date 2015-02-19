@@ -22,6 +22,7 @@ LIBS += OleAut32.lib
 LIBS += ../3rdParty/libsdl2/lib/$$(PROCESSOR_ARCHITECTURE)/SDL2.lib
 LIBS += ../3rdParty/libsdl2/lib/$$(PROCESSOR_ARCHITECTURE)/SDL2main.lib
 LIBS += ../3rdParty/libsdl2_image/lib/$$(PROCESSOR_ARCHITECTURE)/SDL2_image.lib
+LIBS += ../3rdParty/libsdl2_ttf/lib/$$(PROCESSOR_ARCHITECTURE)/SDL2_ttf.lib
 
 INCLUDEPATH += ../3rdParty/libsdl2_image
 INCLUDEPATH += ../3rdParty/libsdl2/include

@@ -74,7 +74,7 @@
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>User32.lib;Shell32.lib;Winmm.lib;Ole32.lib;Gdi32.lib;Version.lib;Imm32.lib;OleAut32.lib;../3rdParty/libsdl2/lib/x86/SDL2.lib;../3rdParty/libsdl2/lib/x86/SDL2main.lib;../3rdParty/libsdl2_image/lib/x86/SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>User32.lib;Shell32.lib;Winmm.lib;Ole32.lib;Gdi32.lib;Version.lib;Imm32.lib;OleAut32.lib;../3rdParty/libsdl2/lib/x86/SDL2.lib;../3rdParty/libsdl2/lib/x86/SDL2main.lib;../3rdParty/libsdl2_image/lib/x86/SDL2_image.lib;../3rdParty/libsdl2_ttf/lib/x86/SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>&quot;/MANIFESTDEPENDENCY:type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos; processorArchitecture=&apos;*&apos;&quot; %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
@@ -114,7 +114,7 @@
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>User32.lib;Shell32.lib;Winmm.lib;Ole32.lib;Gdi32.lib;Version.lib;Imm32.lib;OleAut32.lib;../3rdParty/libsdl2/lib/x86/SDL2.lib;../3rdParty/libsdl2/lib/x86/SDL2main.lib;../3rdParty/libsdl2_image/lib/x86/SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>User32.lib;Shell32.lib;Winmm.lib;Ole32.lib;Gdi32.lib;Version.lib;Imm32.lib;OleAut32.lib;../3rdParty/libsdl2/lib/x86/SDL2.lib;../3rdParty/libsdl2/lib/x86/SDL2main.lib;../3rdParty/libsdl2_image/lib/x86/SDL2_image.lib;../3rdParty/libsdl2_ttf/lib/x86/SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>&quot;/MANIFESTDEPENDENCY:type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos; processorArchitecture=&apos;*&apos;&quot; %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
