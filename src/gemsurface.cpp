@@ -58,10 +58,6 @@ void GemSurface::Render(SDL_Surface& surface)
 			{
 				pixels[i] &= format.Rmask | format.Gmask | format.Bmask;
 				pixels[i] |= 0xFF << format.Ashift;
-				//pixels[i] = (0xFF << format.Rshift)
-				//	+ (0xFF << format.Gshift)
-				//	+ (0xFF << format.Bshift)
-				//	+ (0xFF << format.Ashift);
 			}
 			else if (pixels[i] & format.Amask)
 			{
@@ -79,12 +75,6 @@ void GemSurface::Render(SDL_Surface& surface)
 			}
 		}
 	}
-	if (IsSelected())
-	{
-		if (!copy)
-			copy = CloneSurface();
-	}
-
 	SDL_BlitSurface(!copy ? m_image.get() : copy.get(), nullptr, &surface, 
 		&rect);
 }
