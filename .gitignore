@@ -1,7 +1,8 @@
 *.obj
 *.Debug
 *.Release
-3rdParty/Makefile
+Makefile
+Makefile.*
 *.libsdl2
 *.lib
 *.pdb

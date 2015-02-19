@@ -4,6 +4,13 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gridminer", "src\gridminer.vcxproj", "{74C832C8-7D29-38D3-8E5E-CF69042B1F57}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libsdl2", "3rdParty\libsdl2.vcxproj", "{3E1D9D8E-7CED-3F69-9CC0-9797811B866C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libsdl2_image", "3rdParty\libsdl2_image.vcxproj", "{5F36529A-77CB-3D94-98D3-A5B0DFC3540D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3E1D9D8E-7CED-3F69-9CC0-9797811B866C} = {3E1D9D8E-7CED-3F69-9CC0-9797811B866C}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -14,6 +21,14 @@ Global
 		{74C832C8-7D29-38D3-8E5E-CF69042B1F57}.Debug|Win32.Build.0 = Debug|Win32
 		{74C832C8-7D29-38D3-8E5E-CF69042B1F57}.Release|Win32.ActiveCfg = Release|Win32
 		{74C832C8-7D29-38D3-8E5E-CF69042B1F57}.Release|Win32.Build.0 = Release|Win32
+		{3E1D9D8E-7CED-3F69-9CC0-9797811B866C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3E1D9D8E-7CED-3F69-9CC0-9797811B866C}.Debug|Win32.Build.0 = Debug|Win32
+		{3E1D9D8E-7CED-3F69-9CC0-9797811B866C}.Release|Win32.ActiveCfg = Release|Win32
+		{3E1D9D8E-7CED-3F69-9CC0-9797811B866C}.Release|Win32.Build.0 = Release|Win32
+		{5F36529A-77CB-3D94-98D3-A5B0DFC3540D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5F36529A-77CB-3D94-98D3-A5B0DFC3540D}.Debug|Win32.Build.0 = Debug|Win32
+		{5F36529A-77CB-3D94-98D3-A5B0DFC3540D}.Release|Win32.ActiveCfg = Release|Win32
+		{5F36529A-77CB-3D94-98D3-A5B0DFC3540D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

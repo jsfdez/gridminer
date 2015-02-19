@@ -1,6 +1,7 @@
 TEMPLATE = lib
 CONFIG += staticlib
-CONFIG -= qt
+
+include(../config.pri)
 
 CONFIG(debug, debug|release) {
     DESTDIR = ../debug
@@ -9,7 +10,6 @@ CONFIG(debug, debug|release) {
     DESTDIR = ../release
     OBJECTS_DIR = libsdl2_image_release_obj
 }
-
 
 DEFINES += _SCL_SECURE_NO_WARNINGS
 DEFINES += _WINDOWS
@@ -21,4 +21,9 @@ LIBS += winmm.lib
 INCLUDEPATH += libsdl2_image
 INCLUDEPATH += libsdl2/include
 
-SOURCES += $$files("libsdl2_image/*.c")
+HEADERS += $$files("libsdl2_image/*.h")
+libsdl_precompiled {
+    OTHER_FILES += $$files(libsdl2_image/lib/*.*, true)
+} else {
+    SOURCES += $$files("libsdl2_image/*.c")
+}
