@@ -2,6 +2,7 @@
 
 #include "abstractsurface.h"
 
+#include <set>
 #include <map>
 #include <array>
 #include <memory>
@@ -18,12 +19,15 @@ class GameSurface : public AbstractSurface
 	{
 		ROWS = 8,
 		COLUMNS = ROWS,
+		GEM_COUNT = ROWS * COLUMNS,
 		OFFSET_X = 330u + GemSurface::WIDTH / 2,
 		OFFSET_Y = 100u + GemSurface::HEIGHT / 2,
 	};
 
 	std::shared_ptr<SDL_Surface> m_background;
 	std::array<GemSurface, ROWS * COLUMNS> m_gems;
+
+	std::set<std::set<std::size_t>> FindSets() const;
 
 	void OnMouseMoveEvent(const SDL_MouseMotionEvent& event);
 	void OnMouseClickEvent(const SDL_MouseButtonEvent& event);

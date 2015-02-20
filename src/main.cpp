@@ -43,6 +43,7 @@ int main(int, char**)
 			return top().get();
 		}
 	} scenes;
+	std::srand(static_cast<unsigned int>(time(nullptr)));
 	SDL_Event event;
 	scenes.emplace(new GameSurface);
     while(true)
