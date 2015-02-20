@@ -3,7 +3,7 @@
 #include "abstractsurface.h"
 
 #include <map>
-#include <vector>
+#include <array>
 #include <memory>
 
 #include "gemsurface.h"
@@ -23,7 +23,7 @@ class GameSurface : public AbstractSurface
 	};
 
 	std::shared_ptr<SDL_Surface> m_background;
-	std::vector<std::unique_ptr<AbstractSurface>> m_children;
+	std::array<GemSurface, ROWS * COLUMNS> m_gems;
 
 	void OnMouseMoveEvent(const SDL_MouseMotionEvent& event);
 	void OnMouseClickEvent(const SDL_MouseButtonEvent& event);

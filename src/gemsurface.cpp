@@ -139,3 +139,18 @@ GemSurface::CloneSurface()
 	SDL_BlitSurface(m_image.get(), nullptr, ret.get(), &ret->clip_rect);
 	return ret;
 }
+
+GemSurface::Color GemSurface::GetColor() const
+{
+	return m_color;
+}
+
+void GemSurface::SetColor(Color color)
+{
+	auto it = s_gemFileNames.find(color);
+	m_color = color;
+	if (it == s_gemFileNames.end())
+		m_image.reset();
+	else
+		m_image = ImageLoader::Load(it->second);
+}

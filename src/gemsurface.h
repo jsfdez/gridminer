@@ -5,6 +5,7 @@
 #include <map>
 #include <SDL.h>
 #include <memory>
+#include <cstdint>
 #include <utility>
 
 #include "size.h"
@@ -22,13 +23,15 @@ class GemSurface : public AbstractSurface
 	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> CloneSurface();
 
 public:
-	enum class Color
+	enum class Color : std::uint8_t
 	{
-		BLUE,
+		BLUE = 0,
 		GREEN,
 		PURPLE,
 		RED,
 		YELLOW,
+
+		EMPTY = 0xFF
 	};
 
 	enum
@@ -38,6 +41,7 @@ public:
 		COLOR_COUNT = static_cast<std::size_t>(Color::YELLOW) + 1,
 	};
 
+	GemSurface() = default;
 	GemSurface(Color color);
 	~GemSurface();
 
@@ -56,7 +60,10 @@ public:
 	bool IsSelected() const;
 	void SetSelected(bool value);
 
+	Color GetColor() const;
+	void SetColor(Color color);
+
 private:
-	Color m_color;
+	Color m_color = Color::EMPTY;
 	static const std::map<Color, std::string> s_gemFileNames;
 };
