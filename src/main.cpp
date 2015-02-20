@@ -19,9 +19,14 @@ int main(int, char**)
         auto background = ImageLoader::Load(IMAGE_BACKGROUND);
 		if (background)
 		{
-			window.reset(SDL_CreateWindow("Grid Miner", SDL_WINDOWPOS_UNDEFINED,
-				SDL_WINDOWPOS_UNDEFINED, background->w, background->h,
-				SDL_WINDOW_OPENGL));
+			window.reset(SDL_CreateWindow(
+				"Grid Miner", 
+				SDL_WINDOWPOS_UNDEFINED,
+				SDL_WINDOWPOS_UNDEFINED, 
+				background->w, 
+				background->h,
+				SDL_WINDOW_OPENGL)
+			);
 		}
 	}
 
