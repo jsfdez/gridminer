@@ -24,6 +24,13 @@ class GameSurface : public AbstractSurface
 		OFFSET_Y = 100u + GemSurface::HEIGHT / 2,
 	};
 
+	enum class Animation
+	{
+		NO_ANIMATION,
+		SWAPPING_ANIMATION,
+		ROLLBACK_ANIMATION
+	} m_animation = Animation::NO_ANIMATION;
+
 	std::shared_ptr<SDL_Surface> m_background;
 	std::vector<GemSurface> m_gems;
 	std::uint8_t m_selectedGem;
@@ -31,7 +38,7 @@ class GameSurface : public AbstractSurface
 
 	std::set<std::vector<std::uint8_t>> FindGroups() const;
 	bool AreContiguous(std::uint8_t first, std::uint8_t second) const;
-	void Swap(std::uint8_t first, std::uint8_t second);
+	void Swap(std::uint8_t first, std::uint8_t second, bool rollback);
 
 	void OnMouseMoveEvent(const SDL_Event& event);
 	void OnMouseClickEvent(const SDL_Event& event);
@@ -42,7 +49,7 @@ public:
 
 	virtual Status Update(const SDL_Event& event) override;
 
-	virtual void Animate(const std::chrono::time_point<std::chrono::system_clock>& time) override;
+	virtual Status Update(const std::chrono::time_point<std::chrono::system_clock>& time) override;
 
 	virtual void Render(SDL_Surface& surface) override;
 	virtual bool Contains(const Position& position) const override;

@@ -61,7 +61,7 @@ int main(int, char**)
             }
 			else scenes->Update(event);
 		}
-		scenes->Animate(std::chrono::system_clock::now());
+		scenes->Update(std::chrono::system_clock::now());
 		scenes->Render(surface);
         SDL_UpdateWindowSurface(window.get());
 		auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(

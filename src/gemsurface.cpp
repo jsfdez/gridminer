@@ -42,13 +42,15 @@ GemSurface::Status GemSurface::Update(const SDL_Event&)
 	return Status::CONTINUE;
 }
 
-void GemSurface::Animate(
+AbstractSurface::Status GemSurface::Update(
 	const std::chrono::time_point<std::chrono::system_clock>&)
 {
 	if (m_offset.X != 0)
 		m_offset.X += m_offset.X > 0 ? -2 : 2;
 	else if (m_offset.Y != 0)
 		m_offset.Y += m_offset.Y > 0 ? -2 : 2;
+	else return Status::CONTINUE;
+	return Status::ANIMATION;
 }
 
 void GemSurface::Render(SDL_Surface& surface)

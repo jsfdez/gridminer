@@ -48,7 +48,7 @@ public:
 	~GemSurface();
 
 	virtual Status Update(const SDL_Event& event) override;
-	virtual void Animate(const std::chrono::time_point<std::chrono::system_clock>& time) override;
+	virtual Status Update(const std::chrono::time_point<std::chrono::system_clock>& time) override;
 	virtual void Render(SDL_Surface& surface) override;
 
 	const Position GetPosition() const;

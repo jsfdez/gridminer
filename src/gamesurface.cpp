@@ -10,7 +10,7 @@
 #include "imageloader.h"
 #include "gamesurface.h"
 
-std::uint8_t k_unselectedGem = std::numeric_limits<std::uint8_t>::max();
+std::uint8_t k_noGem = std::numeric_limits<std::uint8_t>::max();
 
 GameSurface::GameSurface()
 {
@@ -26,36 +26,56 @@ AbstractSurface::Status GameSurface::Update(const SDL_Event& event)
 {
 	auto status = Status::CONTINUE;
 
-	for (auto& gem : m_gems)
+	if (m_animation == Animation::NO_ANIMATION) switch (event.type)
 	{
-		if (gem.Update(event) == AbstractSurface::Status::ANIMATION)
-		{
-			status = AbstractSurface::Status::ANIMATION;
-			break;
-		}
-	}
-
-	if (status == Status::CONTINUE) 
-	{
-		switch (event.type)
-		{
-		case SDL_MOUSEMOTION:
-			OnMouseMoveEvent(event);
-			break;
-		case SDL_MOUSEBUTTONDOWN:
-			OnMouseClickEvent(event);
-			break;
-		}
+	case SDL_MOUSEMOTION:
+		OnMouseMoveEvent(event);
+		break;
+	case SDL_MOUSEBUTTONDOWN:
+		OnMouseClickEvent(event);
+		break;
 	}
     return status;
 }
 
-void GameSurface::Animate(
+AbstractSurface::Status GameSurface::Update(
 	const std::chrono::time_point<std::chrono::system_clock>& time)
 {
-	const auto bind = std::bind((Status(GemSurface::*)(decltype(time)))
-		&GemSurface::Animate, std::placeholders::_1, std::ref(time));
-	std::for_each(m_gems.begin(), m_gems.end(), bind);
+	Status status = AbstractSurface::Status::CONTINUE;
+	for (auto& gem : m_gems)
+	{
+		if (gem.Update(time) == AbstractSurface::Status::ANIMATION)
+		{
+			status = AbstractSurface::Status::ANIMATION;
+		}
+	}
+	if (status == AbstractSurface::Status::CONTINUE)
+	{
+		if (m_animation == Animation::SWAPPING_ANIMATION)
+		{
+			SDL_assert(m_swapping.first != m_swapping.second);
+			auto&& groups = FindGroups();
+			if (groups.empty())
+			{
+				Swap(m_swapping.first, m_swapping.second, true);
+			}
+			else
+			{
+				m_animation = Animation::NO_ANIMATION;
+				m_swapping.first = m_swapping.second;
+			}
+		}
+		else if (m_animation == Animation::ROLLBACK_ANIMATION)
+		{
+			SDL_assert(m_swapping.first != m_swapping.second);
+#ifdef _DEBUG
+			auto&& groups = FindGroups();
+			SDL_assert(groups.empty());
+			m_animation = Animation::NO_ANIMATION;
+#endif
+		}
+	}
+	return status;
 }
 
 void GameSurface::Render(SDL_Surface& surface)
@@ -73,7 +93,7 @@ void GameSurface::Create()
 {
 	m_background = ImageLoader::Load(k_imageBackground);
 	decltype(FindGroups()) sets;
-	m_selectedGem = k_unselectedGem;
+	m_selectedGem = k_noGem;
 	std::size_t times = 0;
 	do
 	{
@@ -85,7 +105,6 @@ void GameSurface::Create()
 			auto color = static_cast<GemSurface::Color>(
 				std::rand() % GemSurface::COLOR_COUNT);
 			m_gems.back().SetColor(color);
-			//m_gems.back().SetPosition(position.X, position.Y);
 		}
 		sets.swap(FindGroups());
 		++times;
@@ -195,14 +214,14 @@ void GameSurface::OnMouseClickEvent(const SDL_Event& event)
 	for (auto i = 0u; i < m_gems.size(); ++i)
 	{
 		auto& child = m_gems[i];
-		if (m_selectedGem != k_unselectedGem)
+		if (m_selectedGem != k_noGem)
 		{
 			if (child.Contains(position))
 			{
 				if (AreContiguous(m_selectedGem, i))
 				{
-					Swap(m_selectedGem, i);
-					m_selectedGem = k_unselectedGem;
+					Swap(m_selectedGem, i, false);
+					m_selectedGem = k_noGem;
 				}
 				else
 				{
@@ -257,8 +276,10 @@ Position GameSurface::CalculateGemPosition(std::uint8_t i) const
 	return position;
 }
 
-void GameSurface::Swap(std::uint8_t first, std::uint8_t second)
+void GameSurface::Swap(std::uint8_t first, std::uint8_t second, bool rollback)
 {
 	GemSurface::StartSwapping(m_gems[first], m_gems[second]);
 	m_swapping = std::make_pair(first, second);
+	m_animation = rollback ? Animation::ROLLBACK_ANIMATION 
+		: Animation::SWAPPING_ANIMATION;
 }
