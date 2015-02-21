@@ -10,6 +10,8 @@
 #include "imageloader.h"
 #include "gamesurface.h"
 
+std::uint8_t k_unselectedGem = std::numeric_limits<std::uint8_t>::max();
+
 GameSurface::GameSurface()
 {
 	Create();
@@ -61,6 +63,7 @@ void GameSurface::Create()
 {
 	m_background = ImageLoader::Load(IMAGE_BACKGROUND);
 	decltype(FindSets()) sets;
+	m_selectedGem = k_unselectedGem;
 	std::size_t times = 0;
 	do
 	{
@@ -76,9 +79,10 @@ void GameSurface::Create()
 			m_gems.back().SetColor(color);
 			m_gems.back().SetPosition(position.X, position.Y);
 		}
-		//sets = std::move(FindSets());
+		sets.swap(FindSets());
 		++times;
 	} while (!sets.empty());
+	
 	SDL_Log("Acceptable grid found in %d iterations", times);
 }
 
@@ -174,9 +178,9 @@ std::set<std::set<std::size_t>> GameSurface::FindSets() const
 			if (down.size() >= 3) 
 				ret.insert(down);
 		}
-		auto elapsed = std::chrono::system_clock::now() - start;
-		SDL_Log("Finding sets %d ms", 
-			std::chrono::duration_cast<std::chrono::seconds>(elapsed));
+		//auto elapsed = std::chrono::system_clock::now() - start;
+		//SDL_Log("Finding sets %d ms", 
+		//	std::chrono::duration_cast<std::chrono::seconds>(elapsed));
 	}
 	return ret;
 }
@@ -203,19 +207,46 @@ void GameSurface::OnMouseClickEvent(const SDL_MouseButtonEvent& event)
 	Position position;
 	position.X = event.x;
 	position.Y = event.y;
-	for (auto& child : m_gems)
+	for (auto i = 0u; i < m_gems.size(); ++i)
 	{
-		if (child.Contains(position))
+		auto& child = m_gems[i];
+		if (m_selectedGem != k_unselectedGem)
 		{
-			if (!child.IsSelected())
-				child.SetSelected(true);
+			if (child.Contains(position))
+			{
+				if (AreContiguous(m_selectedGem, i))
+				{
+					std::swap(m_gems[m_selectedGem], m_gems[i]);
+					m_selectedGem = k_unselectedGem;
+				}
+				else
+				{
+					m_selectedGem = i;
+				}
+			}
 		}
-		else if (child.IsSelected())
-			child.SetSelected(false);
+		else if (child.Contains(position))
+		{
+			m_selectedGem = i;
+		}
 	}
 }
 
 bool GameSurface::Contains(const Position&) const
 {
 	return true;
+}
+
+bool GameSurface::AreContiguous(std::uint8_t first, std::uint8_t second) const
+{
+	if (first == second)
+		return false;
+	if (first / COLUMNS == second / COLUMNS)
+		return first + 1 == second || first - 1 == second;
+	else
+	{
+		const auto firstColumn = first % COLUMNS;
+		const auto secondColumn = second % COLUMNS;
+		return firstColumn == secondColumn;
+	}
 }

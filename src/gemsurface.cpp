@@ -19,7 +19,6 @@ decltype(GemSurface::s_gemFileNames) GemSurface::s_gemFileNames
 GemSurface::GemSurface(const GameSurface& game)
 	: m_game(game)
 {
-
 }
 
 GemSurface::GemSurface(const GameSurface& game, Color color)
@@ -55,8 +54,6 @@ void GemSurface::Render(SDL_Surface& surface)
 		WIDTH, 
 		HEIGHT,
 	};
-
-	SDL_Log("%d, %d", m_position.X, m_position.Y);
 
 	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> copy(nullptr, 
 		SDL_FreeSurface);
@@ -168,4 +165,10 @@ void GemSurface::SetColor(Color color)
 		m_image.reset();
 	else
 		m_image = ImageLoader::Load(it->second);
+}
+
+GemSurface& GemSurface::operator=(const GemSurface& other)
+{
+	SetColor(other.GetColor());
+	return *this;
 }

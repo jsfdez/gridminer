@@ -26,8 +26,10 @@ class GameSurface : public AbstractSurface
 
 	std::shared_ptr<SDL_Surface> m_background;
 	std::vector<GemSurface> m_gems;
+	std::uint8_t m_selectedGem;
 
 	std::set<std::set<std::size_t>> FindSets() const;
+	bool AreContiguous(std::uint8_t first, std::uint8_t second) const;
 
 	void OnMouseMoveEvent(const SDL_MouseMotionEvent& event);
 	void OnMouseClickEvent(const SDL_MouseButtonEvent& event);

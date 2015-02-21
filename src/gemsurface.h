@@ -66,6 +66,8 @@ public:
 	Color GetColor() const;
 	void SetColor(Color color);
 
+	GemSurface& operator=(const GemSurface& other);
+
 private:
 	Color m_color = Color::EMPTY;
 	static const std::map<Color, std::string> s_gemFileNames;
