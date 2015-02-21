@@ -15,8 +15,16 @@ decltype(GemSurface::s_gemFileNames) GemSurface::s_gemFileNames
 	{ GemSurface::Color::YELLOW, IMAGE_GEM_YELLOW },
 };
 
-GemSurface::GemSurface(Color color)
-	: m_color(color)
+
+GemSurface::GemSurface(const GameSurface& game)
+	: m_game(game)
+{
+
+}
+
+GemSurface::GemSurface(const GameSurface& game, Color color)
+	: m_game(game)
+	, m_color(color)
 {
 	auto it = s_gemFileNames.find(color);
 	SDL_assert(it != s_gemFileNames.end());
@@ -33,15 +41,22 @@ GemSurface::Status GemSurface::Update(const SDL_Event&)
 	return Status::EXIT;
 }
 
+AbstractSurface::Status GemSurface::Update(const std::chrono::time_point<std::chrono::system_clock>&)
+{
+	return AbstractSurface::Status::CONTINUE;
+}
+
 void GemSurface::Render(SDL_Surface& surface)
 {
 	SDL_Rect rect
 	{
-		m_position.X - WIDTH / 2, 
-		m_position.Y - HEIGHT / 2, 
+		m_position.X - WIDTH / 2,
+		m_position.Y - HEIGHT / 2,
 		WIDTH, 
 		HEIGHT,
 	};
+
+	SDL_Log("%d, %d", m_position.X, m_position.Y);
 
 	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> copy(nullptr, 
 		SDL_FreeSurface);

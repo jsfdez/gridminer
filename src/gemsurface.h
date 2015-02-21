@@ -11,6 +11,7 @@
 #include "size.h"
 #include "position.h"
 
+class GameSurface;
 struct SDL_Surface;
 
 class GemSurface : public AbstractSurface
@@ -19,6 +20,7 @@ class GemSurface : public AbstractSurface
 	Position m_position;
 	bool m_hover = false;
 	bool m_selected = false;
+	const GameSurface& m_game;
 
 	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> CloneSurface();
 
@@ -41,11 +43,12 @@ public:
 		COLOR_COUNT = static_cast<std::size_t>(Color::YELLOW) + 1,
 	};
 
-	GemSurface() = default;
-	GemSurface(Color color);
+	GemSurface(const GameSurface& game);
+	GemSurface(const GameSurface& game, Color color);
 	~GemSurface();
 
 	virtual Status Update(const SDL_Event& event) override;
+	virtual Status Update(const std::chrono::time_point<std::chrono::system_clock>& time) override;
 	virtual void Render(SDL_Surface& surface) override;
 
 	const Position& GetPosition() const;

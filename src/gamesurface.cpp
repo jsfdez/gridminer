@@ -8,6 +8,7 @@
 #include "SDL.h"
 #include "files.h"
 #include "imageloader.h"
+#include "gamesurface.h"
 
 GameSurface::GameSurface()
 {
@@ -19,7 +20,7 @@ GameSurface::~GameSurface()
 	Destroy();
 }
 
-GameSurface::Status GameSurface::Update(const SDL_Event& event)
+AbstractSurface::Status GameSurface::Update(const SDL_Event& event)
 {
 	auto status = Status::CONTINUE;
 
@@ -33,6 +34,16 @@ GameSurface::Status GameSurface::Update(const SDL_Event& event)
 		break;
 	}
     return status;
+}
+
+AbstractSurface::Status GameSurface::Update(
+	const std::chrono::time_point<std::chrono::system_clock>& time)
+{
+	auto status = Status::CONTINUE;
+	const auto bind = std::bind((Status(GemSurface::*)(decltype(time)))
+		&GemSurface::Update, std::placeholders::_1, std::ref(time));
+	std::for_each(m_gems.begin(), m_gems.end(), bind);
+	return status;
 }
 
 void GameSurface::Render(SDL_Surface& surface)
@@ -53,18 +64,19 @@ void GameSurface::Create()
 	std::size_t times = 0;
 	do
 	{
-		for (std::size_t i = 0, size = 8 * 8; i < size; ++i)
+		m_gems.clear();
+		for (std::size_t i = 0, size = GEM_COUNT; i < size; ++i)
 		{
+			m_gems.emplace_back(*this);
 			Position position;
 			position.X = OFFSET_X + GemSurface::WIDTH * (i % COLUMNS);
 			position.Y = OFFSET_Y + GemSurface::HEIGHT * (i / COLUMNS);
 			auto color = static_cast<GemSurface::Color>(
 				std::rand() % GemSurface::COLOR_COUNT);
-			m_gems[i].SetColor(color);
-			m_gems[i].SetPosition(position);
+			m_gems.back().SetColor(color);
+			m_gems.back().SetPosition(position.X, position.Y);
 		}
-		sets = std::move(FindSets());
-		sets.begin();
+		//sets = std::move(FindSets());
 		++times;
 	} while (!sets.empty());
 	SDL_Log("Acceptable grid found in %d iterations", times);

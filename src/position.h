@@ -2,10 +2,14 @@
 
 #include <utility>
 
-struct Position : private std::pair<std::size_t, std::size_t>
+struct Position
 {
-	Position& operator=(const Position& other) = default;
+	std::size_t X; 
+	std::size_t Y;
 
-	decltype(first)& X = first;
-	decltype(second)& Y = second;
+	Position()
+		: X(std::numeric_limits<decltype(X)>::max())
+		, Y(std::numeric_limits<decltype(Y)>::max())
+	{
+	}
 };

@@ -4,7 +4,7 @@
 
 #include <set>
 #include <map>
-#include <array>
+#include <vector>
 #include <memory>
 
 #include "gemsurface.h"
@@ -25,7 +25,7 @@ class GameSurface : public AbstractSurface
 	};
 
 	std::shared_ptr<SDL_Surface> m_background;
-	std::array<GemSurface, ROWS * COLUMNS> m_gems;
+	std::vector<GemSurface> m_gems;
 
 	std::set<std::set<std::size_t>> FindSets() const;
 
@@ -37,6 +37,9 @@ public:
     ~GameSurface();
 
 	virtual Status Update(const SDL_Event& event) override;
+
+	virtual Status Update(const std::chrono::time_point<std::chrono::system_clock>& time) override;
+
 	virtual void Render(SDL_Surface& surface) override;
 	virtual bool Contains(const Position& position) const override;
 
