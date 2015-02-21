@@ -62,7 +62,7 @@ void GameSurface::Render(SDL_Surface& surface)
 void GameSurface::Create()
 {
 	m_background = ImageLoader::Load(IMAGE_BACKGROUND);
-	decltype(FindSets()) sets;
+	decltype(FindGroups()) sets;
 	m_selectedGem = k_unselectedGem;
 	std::size_t times = 0;
 	do
@@ -79,7 +79,7 @@ void GameSurface::Create()
 			m_gems.back().SetColor(color);
 			m_gems.back().SetPosition(position.X, position.Y);
 		}
-		sets.swap(FindSets());
+		sets.swap(FindGroups());
 		++times;
 	} while (!sets.empty());
 	
@@ -91,96 +91,71 @@ void GameSurface::Destroy()
 	m_background.reset();
 }
 
-std::set<std::set<std::size_t>> GameSurface::FindSets() const
+std::set<std::vector<std::uint8_t>> GameSurface::FindGroups() const
 {
-	decltype(FindSets()) ret;
-	typedef std::function<void(std::set<std::size_t>&)> MatchFunction;
-	const MatchFunction matchLeft = [&](std::set<std::size_t>& set)
+	decltype(FindGroups()) ret;
+	typedef std::function<void(std::vector<std::uint8_t>&)> MatchFunction;
+	const MatchFunction matchLeft = [&](std::vector<std::uint8_t>& data)
 	{
-		auto first = *set.begin();
-		if ((first % COLUMNS) != 0 
-			&& m_gems[first].GetColor() == m_gems[first - 1].GetColor())
+		auto last = data.back();
+		auto next = last - 1;
+		if ((last % COLUMNS) != 0 
+			&& m_gems[last].GetColor() == m_gems[next].GetColor())
 		{
-			set.insert(first - 1);
-			matchLeft(set);
+			data.push_back(last - 1);
+			matchLeft(data);
 		}
 	};
-	const MatchFunction matchRight = [&](std::set<std::size_t>& set)
+	const MatchFunction matchRight = [&](std::vector<std::uint8_t>& data)
 	{
-		auto last = *set.rbegin();
+		auto last = data.back();
+		auto next = last + 1;
 		if ((last % COLUMNS) != COLUMNS - 1
-			&& m_gems[last].GetColor() == m_gems[last + 1].GetColor())
+			&& m_gems[last].GetColor() == m_gems[next].GetColor())
 		{
-			set.insert(last);
-			matchLeft(set);
+			data.push_back(last + 1);
+			matchRight(data);
 		}
 	};
-	const MatchFunction matchUp = [&](std::set<std::size_t>& set)
+	const MatchFunction matchUp = [&](std::vector<std::uint8_t>& data)
 	{
-		auto first = *set.begin();
-		if ((first / COLUMNS) != 0
-			&& m_gems[first].GetColor() == m_gems[first - COLUMNS].GetColor())
+		auto last = data.back();
+		auto next = last - COLUMNS;
+		if ((last / COLUMNS) != 0
+			&& m_gems[last].GetColor() == m_gems[next].GetColor())
 		{
-			set.insert(first - COLUMNS);
-			matchUp(set);
+			data.push_back(last - COLUMNS);
+			matchUp(data);
 		}
 	};
-	const MatchFunction matchDown = [&](std::set<std::size_t>& set)
+	const MatchFunction matchDown = [&](std::vector<std::uint8_t>& data)
 	{
-		auto last = *set.rbegin();
+		auto last = data.back();
+		auto next = last + COLUMNS;
 		if (last + COLUMNS < GEM_COUNT
-			&& m_gems[last].GetColor() == m_gems[last + COLUMNS].GetColor())
+			&& m_gems[last].GetColor() == m_gems[next].GetColor())
 		{
-			set.insert(last + COLUMNS);
-			matchDown(set);
+			data.push_back(last + COLUMNS);
+			matchDown(data);
 		}
 	};
 	const auto size = m_gems.size();
-	for (auto i = 0u; i < size; ++i)
+	for (std::uint8_t i = 0u; i < size; ++i)
 	{
 		auto start = std::chrono::system_clock::now();
-		std::set<std::size_t> left, right, up, down;
-		left.insert(i);
-		matchLeft(left);
-		right.insert(i);
-		matchRight(right);
+		std::vector<std::uint8_t> horizontal{ i }, vertical{ i };
+		matchLeft(horizontal);
+		std::reverse(horizontal.begin(), horizontal.end());
+		matchRight(horizontal);
 
-		if (left.size() > 1 && right.size() > 1)
-		{
-			for (const auto i : right)
-				left.insert(i);
-			if (left.size() >= 3)
-				ret.insert(left);
-		}
-		else
-		{
-			if (left.size() >= 3) 
-				ret.insert(left);
-			if (right.size() >= 3) 
-				ret.insert(right);
-		}
+		matchUp(vertical);
+		std::reverse(vertical.begin(), vertical.end());
+		matchDown(vertical);
 
-		up.insert(i);
-		matchUp(up);
-		down.insert(i);
-		matchDown(down);
-		if (up.size() > 1 && down.size() > 1)
-		{
-			for (const auto i : down) 
-				up.insert(i);
-			if (up.size() >= 3) 
-				ret.insert(up);
-		}
-		else
-		{
-			if (up.size() >= 3) 
-				ret.insert(up);
-			if (down.size() >= 3) 
-				ret.insert(down);
-		}
-		//auto elapsed = std::chrono::system_clock::now() - start;
-		//SDL_Log("Finding sets %d ms", 
-		//	std::chrono::duration_cast<std::chrono::seconds>(elapsed));
+		if (horizontal.size() >= 3)
+			ret.insert(horizontal);
+		if (vertical.size() >= 3)
+			ret.insert(vertical);
 	}
 	return ret;
 }
@@ -217,6 +192,12 @@ void GameSurface::OnMouseClickEvent(const SDL_MouseButtonEvent& event)
 				if (AreContiguous(m_selectedGem, i))
 				{
 					std::swap(m_gems[m_selectedGem], m_gems[i]);
+					auto&& sets = FindGroups();
+					if (sets.empty())
+					{
+						std::swap(m_gems[m_selectedGem], m_gems[i]);
+						SDL_assert(FindGroups().empty());
+					}
 					m_selectedGem = k_unselectedGem;
 				}
 				else
