@@ -198,6 +198,12 @@ void GameSurface::OnMouseClickEvent(const SDL_MouseButtonEvent& event)
 						std::swap(m_gems[m_selectedGem], m_gems[i]);
 						SDL_assert(FindGroups().empty());
 					}
+					else
+					{
+						for (const auto& set : sets)
+							for (const auto gem : set)
+								m_gems[gem].SetColor(GemSurface::Color::EMPTY);
+					}
 					m_selectedGem = k_unselectedGem;
 				}
 				else
