@@ -22,6 +22,9 @@
     <ClCompile Include="abstractsurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="files.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="gamesurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

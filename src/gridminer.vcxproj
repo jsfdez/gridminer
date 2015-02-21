@@ -134,6 +134,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="abstractsurface.cpp" />
+    <ClCompile Include="files.cpp" />
     <ClCompile Include="gamesurface.cpp" />
     <ClCompile Include="gemsurface.cpp" />
     <ClCompile Include="image.cpp" />

@@ -27,12 +27,14 @@ class GameSurface : public AbstractSurface
 	std::shared_ptr<SDL_Surface> m_background;
 	std::vector<GemSurface> m_gems;
 	std::uint8_t m_selectedGem;
+	std::pair<std::uint8_t, std::uint8_t> m_swapping;
 
 	std::set<std::vector<std::uint8_t>> FindGroups() const;
 	bool AreContiguous(std::uint8_t first, std::uint8_t second) const;
+	void Swap(std::uint8_t first, std::uint8_t second);
 
-	void OnMouseMoveEvent(const SDL_MouseMotionEvent& event);
-	void OnMouseClickEvent(const SDL_MouseButtonEvent& event);
+	void OnMouseMoveEvent(const SDL_Event& event);
+	void OnMouseClickEvent(const SDL_Event& event);
 
 public:
     GameSurface();
@@ -40,10 +42,13 @@ public:
 
 	virtual Status Update(const SDL_Event& event) override;
 
-	virtual Status Update(const std::chrono::time_point<std::chrono::system_clock>& time) override;
+	virtual void Animate(const std::chrono::time_point<std::chrono::system_clock>& time) override;
 
 	virtual void Render(SDL_Surface& surface) override;
 	virtual bool Contains(const Position& position) const override;
+
+	std::uint8_t GetGemIndex(const GemSurface& gem) const;
+	Position CalculateGemPosition(std::uint8_t i) const;
 
 	void Create();
 	void Destroy();

@@ -17,7 +17,7 @@ struct SDL_Surface;
 class GemSurface : public AbstractSurface
 {
 	std::shared_ptr<SDL_Surface> m_image;
-	Position m_position;
+	Position m_offset = Position(0, 0);
 	bool m_hover = false;
 	bool m_selected = false;
 	const GameSurface& m_game;
@@ -48,12 +48,12 @@ public:
 	~GemSurface();
 
 	virtual Status Update(const SDL_Event& event) override;
-	virtual Status Update(const std::chrono::time_point<std::chrono::system_clock>& time) override;
+	virtual void Animate(const std::chrono::time_point<std::chrono::system_clock>& time) override;
 	virtual void Render(SDL_Surface& surface) override;
 
-	const Position& GetPosition() const;
-	void SetPosition(const Position& position);
-	void SetPosition(std::size_t x, std::size_t y);
+	const Position GetPosition() const;
+	//void SetPosition(const Position& position);
+	//void SetPosition(std::size_t x, std::size_t y);
 
 	bool Contains(const Position& position) const;
 
@@ -65,6 +65,8 @@ public:
 
 	Color GetColor() const;
 	void SetColor(Color color);
+
+	static void StartSwapping(GemSurface& first, GemSurface& second);
 
 	GemSurface& operator=(const GemSurface& other);
 

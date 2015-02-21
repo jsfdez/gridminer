@@ -1,11 +1,10 @@
-#ifndef FILES_H
-#define FILES_H
+#pragma once
 
-#define IMAGE_BACKGROUND    "data/BackGround.jpg"
-#define IMAGE_GEM_BLUE		"data/Blue.png"
-#define IMAGE_GEM_GREEN		"data/Green.png"
-#define IMAGE_GEM_PURPLE	"data/Purple.png"
-#define IMAGE_GEM_RED		"data/Red.png"
-#define IMAGE_GEM_YELLOW	"data/Yellow.png"
+#include <string>
 
-#endif // FILES_H
+extern const std::string k_imageBackground;
+extern const std::string k_imageGemBlue;
+extern const std::string k_imageGemGreen;
+extern const std::string k_imageGemPurple;
+extern const std::string k_imageGemRed;
+extern const std::string k_imageGemYellow;

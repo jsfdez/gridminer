@@ -4,15 +4,16 @@
 #include <cstdint>
 
 #include "files.h"
+#include "gamesurface.h"
 #include "imageloader.h"
 
 decltype(GemSurface::s_gemFileNames) GemSurface::s_gemFileNames
 { 
-	{ GemSurface::Color::BLUE, IMAGE_GEM_BLUE },
-	{ GemSurface::Color::GREEN, IMAGE_GEM_GREEN },
-	{ GemSurface::Color::PURPLE, IMAGE_GEM_PURPLE },
-	{ GemSurface::Color::RED, IMAGE_GEM_RED },
-	{ GemSurface::Color::YELLOW, IMAGE_GEM_YELLOW },
+	{ GemSurface::Color::BLUE, k_imageGemBlue },
+	{ GemSurface::Color::GREEN, k_imageGemGreen },
+	{ GemSurface::Color::PURPLE, k_imageGemPurple },
+	{ GemSurface::Color::RED, k_imageGemRed },
+	{ GemSurface::Color::YELLOW, k_imageGemYellow },
 };
 
 
@@ -36,21 +37,27 @@ GemSurface::~GemSurface()
 
 GemSurface::Status GemSurface::Update(const SDL_Event&)
 {
-	SDL_assert(false);
-	return Status::EXIT;
+	if (m_offset.X || m_offset.Y)
+		return Status::ANIMATION;
+	return Status::CONTINUE;
 }
 
-AbstractSurface::Status GemSurface::Update(const std::chrono::time_point<std::chrono::system_clock>&)
+void GemSurface::Animate(
+	const std::chrono::time_point<std::chrono::system_clock>&)
 {
-	return AbstractSurface::Status::CONTINUE;
+	if (m_offset.X != 0)
+		m_offset.X += m_offset.X > 0 ? -2 : 2;
+	else if (m_offset.Y != 0)
+		m_offset.Y += m_offset.Y > 0 ? -2 : 2;
 }
 
 void GemSurface::Render(SDL_Surface& surface)
 {
+	auto position = GetPosition() + m_offset;
 	SDL_Rect rect
 	{
-		m_position.X - WIDTH / 2,
-		m_position.Y - HEIGHT / 2,
+		position.X - WIDTH / 2,
+		position.Y - HEIGHT / 2,
 		WIDTH, 
 		HEIGHT,
 	};
@@ -91,28 +98,19 @@ void GemSurface::Render(SDL_Surface& surface)
 		&rect);
 }
 
-const Position& GemSurface::GetPosition() const
+const Position GemSurface::GetPosition() const
 {
-	return m_position;
-}
-
-void GemSurface::SetPosition(const Position& position)
-{
-	m_position = position;
-}
-
-void GemSurface::SetPosition(std::size_t x, std::size_t y)
-{
-	m_position.X = x;
-	m_position.Y = y;
+	auto index = m_game.GetGemIndex(*this);
+	return m_game.CalculateGemPosition(index);
 }
 
 bool GemSurface::Contains(const Position& position) const
 {
-	return m_position.X - WIDTH / 2 < position.X
-		&& m_position.X + WIDTH / 2 > position.X
-		&& m_position.Y - HEIGHT / 2 < position.Y
-		&& m_position.Y + HEIGHT / 2 > position.Y;
+	auto currentPosition = GetPosition() + m_offset;
+	return currentPosition.X - WIDTH / 2 < position.X
+		&& currentPosition.X + WIDTH / 2 > position.X
+		&& currentPosition.Y - HEIGHT / 2 < position.Y
+		&& currentPosition.Y + HEIGHT / 2 > position.Y;
 }
 
 bool GemSurface::IsHover() const
@@ -171,4 +169,13 @@ GemSurface& GemSurface::operator=(const GemSurface& other)
 {
 	SetColor(other.GetColor());
 	return *this;
+}
+
+void GemSurface::StartSwapping(GemSurface& first, GemSurface& second)
+{
+	std::swap(first, second);
+	first.m_offset = second.GetPosition() - first.GetPosition();
+	second.m_offset = first.GetPosition() - second.GetPosition();
+	SDL_assert(first.m_offset.X || first.m_offset.Y);
+	SDL_assert(second.m_offset.X || second.m_offset.Y);
 }

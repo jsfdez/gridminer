@@ -16,7 +16,7 @@ int main(int, char**)
     std::unique_ptr<SDL_Window, decltype(SDL_DestroyWindow)*> window(nullptr,
         SDL_DestroyWindow);
 	{
-        auto background = ImageLoader::Load(IMAGE_BACKGROUND);
+		auto background = ImageLoader::Load(k_imageBackground);
 		if (background)
 		{
 			window.reset(SDL_CreateWindow(
@@ -59,10 +59,9 @@ int main(int, char**)
 					return EXIT_SUCCESS;
                 }
             }
-			else
-				scenes->Update(event);
+			else scenes->Update(event);
 		}
-		scenes->Update(std::chrono::system_clock::now());
+		scenes->Animate(std::chrono::system_clock::now());
 		scenes->Render(surface);
         SDL_UpdateWindowSurface(window.get());
 		auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
