@@ -1,7 +1,5 @@
 #pragma once
 
-#include <utility>
-
 struct Position
 {
 	std::size_t X; 
