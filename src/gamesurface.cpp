@@ -51,17 +51,21 @@ AbstractSurface::Status GameSurface::Update(
 	}
 	if (status == AbstractSurface::Status::CONTINUE)
 	{
-		if (m_animation == Animation::SWAPPING_ANIMATION)
+		if (m_animation == Animation::FALL_ANIMATION)
+		{
+			m_animation = Animation::NO_ANIMATION;
+		}
+		else if (m_animation == Animation::SWAPPING_ANIMATION)
 		{
 			SDL_assert(m_swapping.first != m_swapping.second);
-			auto&& groups = FindGroups();
-			if (groups.empty())
+			m_destroyingGems.swap(FindGroups());
+			if (m_destroyingGems.empty())
 			{
 				Swap(m_swapping.first, m_swapping.second, true);
 			}
 			else
 			{
-				for (auto& group : groups)
+				for (auto& group : m_destroyingGems)
 				{
 					SDL_assert(group.size() >= 3);
 					auto diff = group[1] - group[0];
@@ -76,6 +80,17 @@ AbstractSurface::Status GameSurface::Update(
 				m_swapping.first = m_swapping.second;
 				m_selectedGem = k_noGem;
 			}
+		}
+		else if (m_animation == Animation::DESTROY_ANIMATION)
+		{
+			//for (auto& group : m_destroyingGems)
+			//{
+			//	SDL_assert(group.size() >= 3);
+			//	for (auto& i : group)
+			//		m_gems[i].SetColor(GemColor::EMPTY);
+			//}
+			while(!FillRow());
+			m_animation = Animation::NO_ANIMATION;
 		}
 		else if (m_animation == Animation::ROLLBACK_ANIMATION)
 		{
@@ -113,11 +128,10 @@ void GameSurface::Create()
 		// i = gems.size() to avoid unnecesary clears
 		for (auto i = m_gems.size(); i < GEM_COUNT; ++i)
 		{
-			m_gems.emplace_back(*this);
 			auto position = CalculateGemPosition(i);
-			auto color = static_cast<GemColor>(
-				std::rand() % GemSurface::COLOR_COUNT);
-			m_gems.back().SetColor(color);
+			position.X = 0;
+			position.Y = -OFFSET_Y - position.Y;
+			m_gems.emplace_back(*this, position);
 		}
 		sets.swap(FindGroups());
 		++times;
@@ -131,6 +145,8 @@ void GameSurface::Create()
 			}
 		}
 	} while (!sets.empty());
+
+	m_animation = Animation::FALL_ANIMATION;
 	
 	SDL_Log("Acceptable grid found in %d iterations", times);
 }
@@ -304,4 +320,50 @@ void GameSurface::Swap(std::uint8_t first, std::uint8_t second, bool rollback)
 	m_swapping = std::make_pair(first, second);
 	m_animation = rollback ? Animation::ROLLBACK_ANIMATION 
 		: Animation::SWAPPING_ANIMATION;
+}
+
+bool GameSurface::FillRow()
+{
+	const auto findAboveGem = [&](decltype(m_gems.size()) gemIndex)
+	{
+		for (int i = gemIndex - COLUMNS; i >= 0; i -= COLUMNS)
+		{
+			if (m_gems[i].GetColor() != GemColor::EMPTY)
+			{
+				return static_cast<decltype(k_noGem)>(i);
+			}
+		}
+		return k_noGem;
+	};
+	bool nextRow = true;
+	for (auto row = 0; row < ROWS && nextRow; ++row)
+	{
+		for (auto column = 0; column < COLUMNS; ++column)
+		{
+			const auto currentRow = ROWS - row - 1;
+			auto index = column + currentRow * COLUMNS;
+			if (m_gems[index].IsEmpty())
+			{
+				auto otherIndex = findAboveGem(index);
+				auto position = CalculateGemPosition(index);
+				position.X = 0;
+				if (otherIndex != k_noGem)
+				{
+					position.Y = -(position.Y - CalculateGemPosition(otherIndex).Y);
+					std::swap(m_gems[index], m_gems[otherIndex]);
+					m_gems[index].SetOffset(position);
+				}
+				else
+				{
+					position.Y = -OFFSET_Y - position.Y;
+					GemSurface gem(*this, position);
+					m_gems[index] = gem;
+					m_gems[index].SetOffset(position);
+				}
+				m_animation = Animation::FALL_ANIMATION;
+				nextRow = false;
+			}
+		}
+	}
+	return nextRow;
 }

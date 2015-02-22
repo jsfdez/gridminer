@@ -24,11 +24,24 @@ GemSurface::GemSurface(const GameSurface& game)
 
 GemSurface::GemSurface(const GameSurface& game, GemColor color)
 	: m_game(game)
-	, m_color(color)
 {
-	auto it = s_gemFileNames.find(color);
-	SDL_assert(it != s_gemFileNames.end());
-	m_image = loader::Image(it->second);
+	SetColor(color);
+}
+
+GemSurface::GemSurface(const GameSurface& game, GemColor color, Position offset)
+	: m_game(game)
+	, m_offset(offset)
+{
+	SetColor(color);
+}
+
+GemSurface::GemSurface(const GameSurface& game, Position offset)
+	: m_game(game)
+	, m_offset(offset)
+	, m_fallIncrement(std::rand() % 5 + 5)
+{
+	auto color = static_cast<GemColor>(std::rand() % COLOR_COUNT);
+	SetColor(color);
 }
 
 GemSurface::~GemSurface()
@@ -48,13 +61,41 @@ GemSurface::Status GemSurface::Update(const SDL_Event&)
 AbstractSurface::Status GemSurface::Update(
 	const std::chrono::time_point<std::chrono::system_clock>&)
 {
+	auto ret = Status::CONTINUE;
+	const std::size_t destroyAnimationIncrement = 6;
 	if (m_offset.X != 0)
-		m_offset.X += m_offset.X > 0 ? -2 : 2;
-	else if (m_offset.Y != 0)
-		m_offset.Y += m_offset.Y > 0 ? -2 : 2;
-	else if (m_destruction != Destruction::ALIVE && m_alpha) m_alpha -= 1;
-	else return Status::CONTINUE;
-	return Status::ANIMATION;
+	{
+		if (SDL_abs(m_offset.X) < m_fallIncrement) m_offset.X = 0;
+		else
+			m_offset.X += m_offset.X > 0 ? -m_fallIncrement : m_fallIncrement;
+		ret = Status::ANIMATION;
+	}
+	if (m_offset.Y != 0)
+	{
+		if (SDL_abs(m_offset.Y) < m_fallIncrement) m_offset.Y = 0;
+		else
+			m_offset.Y += m_offset.Y > 0 ? -m_fallIncrement : m_fallIncrement;
+		ret = Status::ANIMATION;
+	}
+	else if (m_destruction == Destruction::HORIZONTAL)
+	{
+		static auto data = loader::GetAnimationData(
+			loader::Animation::DESTRUCTION_HORIZONTAL);
+		m_currentFrame += destroyAnimationIncrement;
+		if (m_currentFrame >= data.m_duration)
+			SetColor(GemColor::EMPTY);
+		else ret = Status::ANIMATION;
+	}
+	else if (m_destruction == Destruction::VERTICAL)
+	{
+		static auto data = loader::GetAnimationData(
+			loader::Animation::DESTRUCTION_VERTICAL);
+		m_currentFrame += destroyAnimationIncrement;
+		if (m_currentFrame >= data.m_duration)
+			SetColor(GemColor::EMPTY);
+		else ret = Status::ANIMATION;
+	}
+	return ret;
 }
 
 void GemSurface::Render(SDL_Surface& surface)
@@ -70,19 +111,17 @@ void GemSurface::Render(SDL_Surface& surface)
 		HEIGHT,
 	};
 	SDL_Rect sourceRect{ 0, 0, WIDTH, HEIGHT };
-	if (m_destruction != Destruction::ALIVE)
+	if (m_destruction == Destruction::HORIZONTAL)
 	{
-		auto copy = CloneSurface(true);
-		const auto size = copy->w * copy->h;
-		const auto& format = *copy->format;
-		auto pixels = reinterpret_cast<std::uint32_t*>(copy->pixels);
-		for (std::remove_const<decltype(size)>::type i = 0; i < size; ++i)
-		{
-			auto alpha = (pixels[i] & format.Amask) >> format.Ashift;
-			alpha = alpha - m_alpha > 0 ? alpha - m_alpha : 0;
-			auto rgbMask = format.Rshift + format.Gshift + format.Bshift;
-			pixels[i] = pixels[i] & rgbMask + (alpha << format.Amask);
-		}
+		static auto data = loader::GetAnimationData(
+			loader::Animation::DESTRUCTION_HORIZONTAL);
+		sourceRect.x = WIDTH * (m_currentFrame + data.m_offset);
+	}
+	else if (m_destruction == Destruction::VERTICAL)
+	{
+		static auto data = loader::GetAnimationData(
+			loader::Animation::DESTRUCTION_VERTICAL);
+		sourceRect.x = WIDTH * (m_currentFrame + data.m_offset);
 	}
 	else if (IsHover() || IsSelected())
 	{
@@ -113,11 +152,20 @@ void GemSurface::Render(SDL_Surface& surface)
 			}
 		}
 	}
-	auto result = SDL_BlitSurface(!copy ? m_image.get() : copy.get(), 
-		&sourceRect, &surface, &rect);
-	if (result)
+	if (m_image)
 	{
-		SDL_Log("Error in SDL_BlitSurface: %s\n", SDL_GetError());
+		if (rect.y < 90)
+		{
+			sourceRect.h = SDL_max(rect.y - 90, 0);
+			if (sourceRect.h)
+				return;
+		}
+		auto result = SDL_BlitSurface(!copy ? m_image.get() : copy.get(),
+			&sourceRect, &surface, &rect);
+		if (result)
+		{
+			SDL_Log("Error in SDL_BlitSurface: %s\n", SDL_GetError());
+		}
 	}
 }
 
@@ -189,6 +237,10 @@ void GemSurface::SetColor(GemColor color)
 		m_image.reset();
 	else
 		m_image = loader::GemSurface(color);
+	if (color != GemColor::EMPTY)
+	{
+		m_destruction = Destruction::ALIVE;
+	}
 }
 
 GemSurface& GemSurface::operator=(const GemSurface& other)
@@ -214,5 +266,17 @@ bool GemSurface::IsDestroyed() const
 void GemSurface::Destroy(Destruction destruction)
 {
 	SDL_assert(destruction != Destruction::ALIVE);
+	m_currentFrame = 0;
 	m_destruction = destruction;
+}
+
+bool GemSurface::IsEmpty() const
+{
+	return m_color == GemColor::EMPTY;
+}
+
+void GemSurface::SetOffset(const Position& position)
+{
+	m_offset.X = position.X;
+	m_offset.Y = position.Y;
 }

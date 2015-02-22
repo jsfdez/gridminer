@@ -27,6 +27,7 @@ class GameSurface : public AbstractSurface
 	enum class Animation
 	{
 		NO_ANIMATION,
+		FALL_ANIMATION,
 		SWAPPING_ANIMATION,
 		ROLLBACK_ANIMATION,
 		DESTROY_ANIMATION,
@@ -36,10 +37,12 @@ class GameSurface : public AbstractSurface
 	std::vector<GemSurface> m_gems;
 	std::uint8_t m_selectedGem;
 	std::pair<std::uint8_t, std::uint8_t> m_swapping;
+	std::set<std::vector<std::uint8_t>> m_destroyingGems;
 
 	std::set<std::vector<std::uint8_t>> FindGroups() const;
 	bool AreContiguous(std::uint8_t first, std::uint8_t second) const;
 	void Swap(std::uint8_t first, std::uint8_t second, bool rollback);
+	bool FillRow();
 
 	void OnMouseMoveEvent(const SDL_Event& event);
 	void OnMouseClickEvent(const SDL_Event& event);

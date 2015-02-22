@@ -22,6 +22,7 @@ class GemSurface : public AbstractSurface
 	bool m_hover = false;
 	bool m_selected = false;
 	const GameSurface& m_game;
+	std::uint8_t m_fallIncrement = 10;
 
 	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> CloneSurface(bool copy);
 
@@ -42,6 +43,8 @@ public:
 
 	GemSurface(const GameSurface& game);
 	GemSurface(const GameSurface& game, GemColor color);
+	GemSurface(const GameSurface& game, GemColor color, Position offset);
+	GemSurface(const GameSurface& game, Position offset);
 	~GemSurface();
 
 	virtual Status Update(const SDL_Event& event) override;
@@ -55,6 +58,7 @@ public:
 	bool IsHover() const;
 	void SetHover(bool value);
 
+	bool IsEmpty() const;
 	bool IsSelected() const;
 	void SetSelected(bool value);
 	void Destroy(Destruction destruction);
@@ -62,6 +66,7 @@ public:
 
 	GemColor GetColor() const;
 	void SetColor(GemColor color);
+	void SetOffset(const Position& position);
 
 	static void StartSwapping(GemSurface& first, GemSurface& second);
 
@@ -72,5 +77,6 @@ private:
 	Destruction m_destruction = Destruction::ALIVE;
 	//std::uint8_t m_size = 40;
 	std::uint8_t m_alpha = 0xFF;
+	std::size_t m_currentFrame = 0;
 	static const std::map<GemColor, std::string> s_gemFileNames;
 };
