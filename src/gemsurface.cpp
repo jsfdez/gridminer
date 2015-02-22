@@ -5,15 +5,15 @@
 
 #include "files.h"
 #include "gamesurface.h"
-#include "imageloader.h"
+#include "loader.h"
 
 decltype(GemSurface::s_gemFileNames) GemSurface::s_gemFileNames
 { 
-	{ GemSurface::Color::BLUE, k_imageGemBlue },
-	{ GemSurface::Color::GREEN, k_imageGemGreen },
-	{ GemSurface::Color::PURPLE, k_imageGemPurple },
-	{ GemSurface::Color::RED, k_imageGemRed },
-	{ GemSurface::Color::YELLOW, k_imageGemYellow },
+	{ GemColor::BLUE, k_imageGemBlue },
+	{ GemColor::GREEN, k_imageGemGreen },
+	{ GemColor::PURPLE, k_imageGemPurple },
+	{ GemColor::RED, k_imageGemRed },
+	{ GemColor::YELLOW, k_imageGemYellow },
 };
 
 
@@ -22,13 +22,13 @@ GemSurface::GemSurface(const GameSurface& game)
 {
 }
 
-GemSurface::GemSurface(const GameSurface& game, Color color)
+GemSurface::GemSurface(const GameSurface& game, GemColor color)
 	: m_game(game)
 	, m_color(color)
 {
 	auto it = s_gemFileNames.find(color);
 	SDL_assert(it != s_gemFileNames.end());
-	m_image = ImageLoader::Load(it->second);
+	m_image = loader::Image(it->second);
 }
 
 GemSurface::~GemSurface()
@@ -37,8 +37,11 @@ GemSurface::~GemSurface()
 
 GemSurface::Status GemSurface::Update(const SDL_Event&)
 {
-	if (m_offset.X || m_offset.Y)
+	if (m_offset.X || m_offset.Y 
+		|| (m_destruction != Destruction::ALIVE && m_alpha))
+	{
 		return Status::ANIMATION;
+	}
 	return Status::CONTINUE;
 }
 
@@ -49,12 +52,15 @@ AbstractSurface::Status GemSurface::Update(
 		m_offset.X += m_offset.X > 0 ? -2 : 2;
 	else if (m_offset.Y != 0)
 		m_offset.Y += m_offset.Y > 0 ? -2 : 2;
+	else if (m_destruction != Destruction::ALIVE && m_alpha) m_alpha -= 1;
 	else return Status::CONTINUE;
 	return Status::ANIMATION;
 }
 
 void GemSurface::Render(SDL_Surface& surface)
 {
+	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> copy(nullptr,
+		SDL_FreeSurface);
 	auto position = GetPosition() + m_offset;
 	SDL_Rect rect
 	{
@@ -63,13 +69,24 @@ void GemSurface::Render(SDL_Surface& surface)
 		WIDTH, 
 		HEIGHT,
 	};
-
-	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> copy(nullptr, 
-		SDL_FreeSurface);
-
-	if (IsHover() || IsSelected())
+	SDL_Rect sourceRect{ 0, 0, WIDTH, HEIGHT };
+	if (m_destruction != Destruction::ALIVE)
 	{
-		copy = CloneSurface();
+		auto copy = CloneSurface(true);
+		const auto size = copy->w * copy->h;
+		const auto& format = *copy->format;
+		auto pixels = reinterpret_cast<std::uint32_t*>(copy->pixels);
+		for (std::remove_const<decltype(size)>::type i = 0; i < size; ++i)
+		{
+			auto alpha = (pixels[i] & format.Amask) >> format.Ashift;
+			alpha = alpha - m_alpha > 0 ? alpha - m_alpha : 0;
+			auto rgbMask = format.Rshift + format.Gshift + format.Bshift;
+			pixels[i] = pixels[i] & rgbMask + (alpha << format.Amask);
+		}
+	}
+	else if (IsHover() || IsSelected())
+	{
+		auto copy = CloneSurface(true);
 		const auto size = copy->w * copy->h;
 		const auto& format = *copy->format;
 		auto pixels = reinterpret_cast<std::uint32_t*>(copy->pixels);
@@ -96,8 +113,12 @@ void GemSurface::Render(SDL_Surface& surface)
 			}
 		}
 	}
-	SDL_BlitSurface(!copy ? m_image.get() : copy.get(), nullptr, &surface, 
-		&rect);
+	auto result = SDL_BlitSurface(!copy ? m_image.get() : copy.get(), 
+		&sourceRect, &surface, &rect);
+	if (result)
+	{
+		SDL_Log("Error in SDL_BlitSurface: %s\n", SDL_GetError());
+	}
 }
 
 const Position GemSurface::GetPosition() const
@@ -136,35 +157,38 @@ void GemSurface::SetSelected(bool value)
 }
 
 std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> 
-GemSurface::CloneSurface()
+GemSurface::CloneSurface(bool copy)
 {
-	decltype(CloneSurface()) ret(nullptr, SDL_FreeSurface);
-	ret.reset(SDL_CreateRGBSurface(m_image->flags, 
-		m_image->w, 
-		m_image->h, 
-		m_image->format->BitsPerPixel, 
-		m_image->format->Rmask, 
-		m_image->format->Gmask, 
-		m_image->format->Bmask, 
+	decltype(CloneSurface(copy)) ret(nullptr, SDL_FreeSurface);
+	ret.reset(SDL_CreateRGBSurface(m_image->flags,
+		WIDTH,
+		HEIGHT,
+		m_image->format->BitsPerPixel,
+		m_image->format->Rmask,
+		m_image->format->Gmask,
+		m_image->format->Bmask,
 		m_image->format->Amask)
 	);
-	SDL_BlitSurface(m_image.get(), nullptr, ret.get(), &ret->clip_rect);
+	if (copy)
+	{
+		SDL_BlitSurface(m_image.get(), nullptr, ret.get(), &ret->clip_rect);
+	}
 	return ret;
 }
 
-GemSurface::Color GemSurface::GetColor() const
+GemColor GemSurface::GetColor() const
 {
 	return m_color;
 }
 
-void GemSurface::SetColor(Color color)
+void GemSurface::SetColor(GemColor color)
 {
 	auto it = s_gemFileNames.find(color);
 	m_color = color;
 	if (it == s_gemFileNames.end())
 		m_image.reset();
 	else
-		m_image = ImageLoader::Load(it->second);
+		m_image = loader::GemSurface(color);
 }
 
 GemSurface& GemSurface::operator=(const GemSurface& other)
@@ -180,4 +204,15 @@ void GemSurface::StartSwapping(GemSurface& first, GemSurface& second)
 	second.m_offset = first.GetPosition() - second.GetPosition();
 	SDL_assert(first.m_offset.X || first.m_offset.Y);
 	SDL_assert(second.m_offset.X || second.m_offset.Y);
+}
+
+bool GemSurface::IsDestroyed() const
+{
+	return m_destruction != Destruction::ALIVE;
+}
+
+void GemSurface::Destroy(Destruction destruction)
+{
+	SDL_assert(destruction != Destruction::ALIVE);
+	m_destruction = destruction;
 }

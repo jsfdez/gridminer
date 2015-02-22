@@ -28,7 +28,8 @@ class GameSurface : public AbstractSurface
 	{
 		NO_ANIMATION,
 		SWAPPING_ANIMATION,
-		ROLLBACK_ANIMATION
+		ROLLBACK_ANIMATION,
+		DESTROY_ANIMATION,
 	} m_animation = Animation::NO_ANIMATION;
 
 	std::shared_ptr<SDL_Surface> m_background;

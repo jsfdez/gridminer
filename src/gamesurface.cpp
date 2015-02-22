@@ -7,7 +7,7 @@
 
 #include "SDL.h"
 #include "files.h"
-#include "imageloader.h"
+#include "loader.h"
 #include "gamesurface.h"
 
 std::uint8_t k_noGem = std::numeric_limits<std::uint8_t>::max();
@@ -61,8 +61,20 @@ AbstractSurface::Status GameSurface::Update(
 			}
 			else
 			{
-				m_animation = Animation::NO_ANIMATION;
+				for (auto& group : groups)
+				{
+					SDL_assert(group.size() >= 3);
+					auto diff = group[1] - group[0];
+					for (auto& i : group)
+					{
+						m_gems[i].Destroy(diff == 1
+							? GemSurface::Destruction::HORIZONTAL
+							: GemSurface::Destruction::VERTICAL);
+					}
+				}
+				m_animation = Animation::DESTROY_ANIMATION;
 				m_swapping.first = m_swapping.second;
+				m_selectedGem = k_noGem;
 			}
 		}
 		else if (m_animation == Animation::ROLLBACK_ANIMATION)
@@ -71,8 +83,9 @@ AbstractSurface::Status GameSurface::Update(
 #ifdef _DEBUG
 			auto&& groups = FindGroups();
 			SDL_assert(groups.empty());
-			m_animation = Animation::NO_ANIMATION;
 #endif
+			m_animation = Animation::NO_ANIMATION;
+			m_selectedGem = k_noGem;
 		}
 	}
 	return status;
@@ -91,23 +104,32 @@ void GameSurface::Render(SDL_Surface& surface)
 
 void GameSurface::Create()
 {
-	m_background = ImageLoader::Load(k_imageBackground);
+	m_background = loader::Image(k_imageBackground);
 	decltype(FindGroups()) sets;
 	m_selectedGem = k_noGem;
 	std::size_t times = 0;
 	do
 	{
-		m_gems.clear();
-		for (std::size_t i = 0, size = GEM_COUNT; i < size; ++i)
+		// i = gems.size() to avoid unnecesary clears
+		for (auto i = m_gems.size(); i < GEM_COUNT; ++i)
 		{
 			m_gems.emplace_back(*this);
 			auto position = CalculateGemPosition(i);
-			auto color = static_cast<GemSurface::Color>(
+			auto color = static_cast<GemColor>(
 				std::rand() % GemSurface::COLOR_COUNT);
 			m_gems.back().SetColor(color);
 		}
 		sets.swap(FindGroups());
 		++times;
+		for (auto& set : sets) // Randomize found sets
+		{
+			for (auto& i : set)
+			{
+				auto color = static_cast<GemColor>(
+					std::rand() % GemSurface::COLOR_COUNT);
+				m_gems[i].SetColor(color);
+			}
+		}
 	} while (!sets.empty());
 	
 	SDL_Log("Acceptable grid found in %d iterations", times);

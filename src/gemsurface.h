@@ -10,6 +10,7 @@
 
 #include "size.h"
 #include "position.h"
+#include "gemcolor.h"
 
 class GameSurface;
 struct SDL_Surface;
@@ -22,29 +23,25 @@ class GemSurface : public AbstractSurface
 	bool m_selected = false;
 	const GameSurface& m_game;
 
-	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> CloneSurface();
+	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> CloneSurface(bool copy);
 
 public:
-	enum class Color : std::uint8_t
-	{
-		BLUE = 0,
-		GREEN,
-		PURPLE,
-		RED,
-		YELLOW,
-
-		EMPTY = 0xFF
-	};
-
 	enum
 	{
 		WIDTH = 42u,
 		HEIGHT = WIDTH,
-		COLOR_COUNT = static_cast<std::size_t>(Color::YELLOW) + 1,
+		COLOR_COUNT = static_cast<std::size_t>(GemColor::YELLOW) + 1,
+	};
+
+	enum class Destruction
+	{
+		ALIVE,
+		HORIZONTAL,
+		VERTICAL,
 	};
 
 	GemSurface(const GameSurface& game);
-	GemSurface(const GameSurface& game, Color color);
+	GemSurface(const GameSurface& game, GemColor color);
 	~GemSurface();
 
 	virtual Status Update(const SDL_Event& event) override;
@@ -52,8 +49,6 @@ public:
 	virtual void Render(SDL_Surface& surface) override;
 
 	const Position GetPosition() const;
-	//void SetPosition(const Position& position);
-	//void SetPosition(std::size_t x, std::size_t y);
 
 	bool Contains(const Position& position) const;
 
@@ -62,15 +57,20 @@ public:
 
 	bool IsSelected() const;
 	void SetSelected(bool value);
+	void Destroy(Destruction destruction);
+	bool IsDestroyed() const;
 
-	Color GetColor() const;
-	void SetColor(Color color);
+	GemColor GetColor() const;
+	void SetColor(GemColor color);
 
 	static void StartSwapping(GemSurface& first, GemSurface& second);
 
 	GemSurface& operator=(const GemSurface& other);
 
 private:
-	Color m_color = Color::EMPTY;
-	static const std::map<Color, std::string> s_gemFileNames;
+	GemColor m_color = GemColor::EMPTY;
+	Destruction m_destruction = Destruction::ALIVE;
+	//std::uint8_t m_size = 40;
+	std::uint8_t m_alpha = 0xFF;
+	static const std::map<GemColor, std::string> s_gemFileNames;
 };
