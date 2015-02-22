@@ -140,6 +140,7 @@
     <ClCompile Include="gemsurface.cpp" />
     <ClCompile Include="loader.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="scoreboardsurface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="abstractsurface.h" />
@@ -150,6 +151,7 @@
     <ClInclude Include="gemsurface.h" />
     <ClInclude Include="loader.h" />
     <ClInclude Include="position.h" />
+    <ClInclude Include="scoreboardsurface.h" />
     <ClInclude Include="size.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
