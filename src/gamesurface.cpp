@@ -63,34 +63,14 @@ AbstractSurface::Status GameSurface::Update(
 			{
 				Swap(m_swapping.first, m_swapping.second, true);
 			}
-			else
-			{
-				for (auto& group : m_destroyingGems)
-				{
-					SDL_assert(group.size() >= 3);
-					auto diff = group[1] - group[0];
-					for (auto& i : group)
-					{
-						m_gems[i].Destroy(diff == 1
-							? GemSurface::Destruction::HORIZONTAL
-							: GemSurface::Destruction::VERTICAL);
-					}
-				}
-				m_animation = Animation::DESTROY_ANIMATION;
-				m_swapping.first = m_swapping.second;
-				m_selectedGem = k_noGem;
-			}
+			else StartDestruction();
 		}
 		else if (m_animation == Animation::DESTROY_ANIMATION)
 		{
-			//for (auto& group : m_destroyingGems)
-			//{
-			//	SDL_assert(group.size() >= 3);
-			//	for (auto& i : group)
-			//		m_gems[i].SetColor(GemColor::EMPTY);
-			//}
 			while(!FillRow());
-			m_animation = Animation::NO_ANIMATION;
+			m_destroyingGems.swap(FindGroups());
+			if (!m_destroyingGems.empty())
+				StartDestruction();
 		}
 		else if (m_animation == Animation::ROLLBACK_ANIMATION)
 		{
@@ -286,11 +266,7 @@ bool GameSurface::AreContiguous(std::uint8_t first, std::uint8_t second) const
 	if (first / COLUMNS == second / COLUMNS)
 		return first + 1 == second || first - 1 == second;
 	else
-	{
-		const auto firstColumn = first % COLUMNS;
-		const auto secondColumn = second % COLUMNS;
-		return firstColumn == secondColumn;
-	}
+		return SDL_abs(first - second) == COLUMNS;
 }
 
 std::uint8_t GameSurface::GetGemIndex(const GemSurface& gem) const
@@ -366,4 +342,22 @@ bool GameSurface::FillRow()
 		}
 	}
 	return nextRow;
+}
+
+void GameSurface::StartDestruction()
+{
+	for (auto& group : m_destroyingGems)
+	{
+		SDL_assert(group.size() >= 3);
+		auto diff = group[1] - group[0];
+		for (auto& i : group)
+		{
+			m_gems[i].Destroy(diff == 1
+				? GemSurface::Destruction::HORIZONTAL
+				: GemSurface::Destruction::VERTICAL);
+		}
+	}
+	m_animation = Animation::DESTROY_ANIMATION;
+	m_swapping.first = m_swapping.second;
+	m_selectedGem = k_noGem;
 }

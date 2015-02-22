@@ -43,6 +43,7 @@ class GameSurface : public AbstractSurface
 	bool AreContiguous(std::uint8_t first, std::uint8_t second) const;
 	void Swap(std::uint8_t first, std::uint8_t second, bool rollback);
 	bool FillRow();
+	void StartDestruction();
 
 	void OnMouseMoveEvent(const SDL_Event& event);
 	void OnMouseClickEvent(const SDL_Event& event);

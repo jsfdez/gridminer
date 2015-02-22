@@ -38,7 +38,7 @@ GemSurface::GemSurface(const GameSurface& game, GemColor color, Position offset)
 GemSurface::GemSurface(const GameSurface& game, Position offset)
 	: m_game(game)
 	, m_offset(offset)
-	, m_fallIncrement(std::rand() % 5 + 5)
+	, m_fallIncrement(10)
 {
 	auto color = static_cast<GemColor>(std::rand() % COLOR_COUNT);
 	SetColor(color);
