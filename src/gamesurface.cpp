@@ -34,6 +34,9 @@ AbstractSurface::Status GameSurface::Update(const SDL_Event& event)
 	case SDL_MOUSEBUTTONDOWN:
 		OnMouseClickEvent(event);
 		break;
+	case SDL_MOUSEBUTTONUP:
+		OnMouseReleaseEvent(event);
+		break;
 	}
     return status;
 }
@@ -89,12 +92,17 @@ AbstractSurface::Status GameSurface::Update(
 void GameSurface::Render(SDL_Surface& surface)
 {
 	SDL_BlitSurface(m_background.get(), nullptr, &surface, nullptr);
-	std::for_each(m_gems.begin(), m_gems.end(), 
-		std::bind(
-			&GemSurface::Render, std::placeholders::_1, 
-			std::ref(surface)
-		)
-	);
+	const auto bind = std::bind(&GemSurface::Render, std::placeholders::_1,
+		std::ref(surface));
+	std::vector<GemSurface*> postponed;
+	for (auto& gem : m_gems)
+	{
+		if (!gem.IsDragging())
+			gem.Render(surface);
+		else
+			postponed.push_back(&gem);
+	}
+	std::for_each(postponed.begin(), postponed.end(), bind);
 }
 
 void GameSurface::Create()
@@ -125,9 +133,7 @@ void GameSurface::Create()
 			}
 		}
 	} while (!sets.empty());
-
 	m_animation = Animation::FALL_ANIMATION;
-	
 	SDL_Log("Acceptable grid found in %d iterations", times);
 }
 
@@ -211,6 +217,19 @@ void GameSurface::OnMouseMoveEvent(const SDL_Event& event)
 	Position position;
 	position.X = e.x;
 	position.Y = e.y;
+	if (e.state == SDL_BUTTON_LEFT)
+	{
+		auto gemPosition = CalculateGemPosition(m_selectedGem);
+		if (m_selectedGem != k_noGem 
+			&& (SDL_abs(gemPosition.X - position.X) > GemSurface::WIDTH / 2
+			|| SDL_abs(gemPosition.Y - position.Y) > GemSurface::HEIGHT / 2))
+		{
+			gemPosition.X = position.X - gemPosition.X;
+			gemPosition.Y = position.Y - gemPosition.Y;
+			m_gems[m_selectedGem].SetOffset(gemPosition);
+			m_gems[m_selectedGem].SetDragging(true);
+		}
+	}
 	for (auto& child : m_gems)
 	{
 		if (child.Contains(position))
@@ -250,6 +269,18 @@ void GameSurface::OnMouseClickEvent(const SDL_Event& event)
 		else if (child.Contains(position))
 		{
 			m_selectedGem = i;
+		}
+	}
+}
+
+void GameSurface::OnMouseReleaseEvent(const SDL_Event& event)
+{
+	if (m_selectedGem != k_noGem)
+	{
+		if (m_gems[m_selectedGem].IsDragging())
+		{
+			m_gems[m_selectedGem].SetDragging(false);
+			OnMouseClickEvent(event);
 		}
 	}
 }

@@ -63,14 +63,14 @@ AbstractSurface::Status GemSurface::Update(
 {
 	auto ret = Status::CONTINUE;
 	const std::size_t destroyAnimationIncrement = 6;
-	if (m_offset.X != 0)
+	if (!m_dragging && m_offset.X != 0)
 	{
 		if (SDL_abs(m_offset.X) < m_fallIncrement) m_offset.X = 0;
 		else
 			m_offset.X += m_offset.X > 0 ? -m_fallIncrement : m_fallIncrement;
 		ret = Status::ANIMATION;
 	}
-	if (m_offset.Y != 0)
+	if (!m_dragging && m_offset.Y != 0)
 	{
 		if (SDL_abs(m_offset.Y) < m_fallIncrement) m_offset.Y = 0;
 		else
@@ -279,4 +279,14 @@ void GemSurface::SetOffset(const Position& position)
 {
 	m_offset.X = position.X;
 	m_offset.Y = position.Y;
+}
+
+void GemSurface::SetDragging(bool value)
+{
+	m_dragging = value;
+}
+
+bool GemSurface::IsDragging() const
+{
+	return m_dragging;
 }

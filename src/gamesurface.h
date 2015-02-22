@@ -39,6 +39,13 @@ class GameSurface : public AbstractSurface
 	std::pair<std::uint8_t, std::uint8_t> m_swapping;
 	std::set<std::vector<std::uint8_t>> m_destroyingGems;
 
+	enum class Direction
+	{
+		UP,
+		DOWN,
+		LEFT,
+		RIGHT,
+	};
 	std::set<std::vector<std::uint8_t>> FindGroups() const;
 	bool AreContiguous(std::uint8_t first, std::uint8_t second) const;
 	void Swap(std::uint8_t first, std::uint8_t second, bool rollback);
@@ -47,6 +54,7 @@ class GameSurface : public AbstractSurface
 
 	void OnMouseMoveEvent(const SDL_Event& event);
 	void OnMouseClickEvent(const SDL_Event& event);
+	void OnMouseReleaseEvent(const SDL_Event& event);
 
 public:
     GameSurface();
