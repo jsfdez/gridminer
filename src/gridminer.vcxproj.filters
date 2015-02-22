@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Header Files">
@@ -22,6 +22,9 @@
     <ClCompile Include="abstractsurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="candlewicksurface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="files.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -31,18 +34,18 @@
     <ClCompile Include="gemsurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="image.cpp">
+    <ClCompile Include="loader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="loader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="abstractsurface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="candlewicksurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="files.h">
@@ -57,13 +60,13 @@
     <ClInclude Include="gemsurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="position.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="size.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

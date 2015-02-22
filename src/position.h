@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 struct Position
 {
 	std::int32_t X = 0; 

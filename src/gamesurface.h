@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "gemsurface.h"
+#include "candlewicksurface.h"
 
 struct Position;
 struct SDL_MouseMotionEvent;
@@ -38,6 +39,7 @@ class GameSurface : public AbstractSurface
 	std::uint8_t m_selectedGem;
 	std::pair<std::uint8_t, std::uint8_t> m_swapping;
 	std::set<std::vector<std::uint8_t>> m_destroyingGems;
+	CandlewickSurface m_candlewick;
 
 	enum class Direction
 	{

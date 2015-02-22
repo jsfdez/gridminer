@@ -13,6 +13,7 @@
 std::uint8_t k_noGem = std::numeric_limits<std::uint8_t>::max();
 
 GameSurface::GameSurface()
+	: m_candlewick(*this)
 {
 	Create();
 }
@@ -86,6 +87,7 @@ AbstractSurface::Status GameSurface::Update(
 			m_selectedGem = k_noGem;
 		}
 	}
+	m_candlewick.Update(time);
 	return status;
 }
 
@@ -103,6 +105,7 @@ void GameSurface::Render(SDL_Surface& surface)
 			postponed.push_back(&gem);
 	}
 	std::for_each(postponed.begin(), postponed.end(), bind);
+	m_candlewick.Render(surface);
 }
 
 void GameSurface::Create()
