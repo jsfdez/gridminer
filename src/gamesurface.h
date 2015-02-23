@@ -43,6 +43,8 @@ class GameSurface : public AbstractSurface
 	CandlewickSurface m_candlewick;
 	ScoreboardSurface m_scoreboard;
 	bool m_gameOver = false;
+	std::unique_ptr<TTF_Font, decltype(TTF_CloseFont)*> m_gameOverFont;
+	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> m_gameOverSurface;
 
 	enum class Direction
 	{

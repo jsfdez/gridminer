@@ -7,3 +7,4 @@ const std::string k_imageGemPurple = "data/Purple.png";
 const std::string k_imageGemRed = "data/Red.png";
 const std::string k_imageGemYellow = "data/Yellow.png";
 const std::string k_font = "data/FunnyKid.ttf";
+const std::string k_gameOverFont = "data/Gameover.ttf";

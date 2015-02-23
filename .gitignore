@@ -21,3 +21,4 @@ gridminer.pro.user
 3rdParty/libsdl2.vcxproj.user
 3rdParty/libsdl2/VisualC/tests/testgesture/testgesture_VS2013.vcxproj.user
 3rdParty/libsdl2_image.vcxproj.user
+/3rdParty/libsdl2_ttf/lib/x86/test

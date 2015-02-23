@@ -8,6 +8,7 @@
 #include "SDL.h"
 #include "files.h"
 #include "loader.h"
+#include "SDL_ttf.h"
 #include "gamesurface.h"
 
 std::uint8_t k_noGem = std::numeric_limits<std::uint8_t>::max();
@@ -15,13 +16,17 @@ std::uint8_t k_noGem = std::numeric_limits<std::uint8_t>::max();
 GameSurface::GameSurface()
 	: m_candlewick(*this)
 	, m_scoreboard(*this)
+	, m_gameOverFont(nullptr, TTF_CloseFont)
+	, m_gameOverSurface(nullptr, SDL_FreeSurface)
 {
+	TTF_Init();
 	Create();
 }
 
 GameSurface::~GameSurface()
 {
 	Destroy();
+	TTF_Quit();
 }
 
 AbstractSurface::Status GameSurface::Update(const SDL_Event& event)
@@ -29,7 +34,15 @@ AbstractSurface::Status GameSurface::Update(const SDL_Event& event)
 	auto status = Status::CONTINUE;
 
 	if (m_gameOver)
-		status = Status::EXIT;
+	{
+		if (event.type == SDL_MOUSEBUTTONDOWN)
+		{
+			Destroy();
+			Create();
+			status = Status::CONTINUE;
+		}
+		else  status = Status::EXIT;
+	}
 	else if (m_animation == Animation::NO_ANIMATION) switch (event.type)
 	{
 	case SDL_MOUSEMOTION:
@@ -131,6 +144,22 @@ void GameSurface::Render(SDL_Surface& surface)
 			pixels[i] = r << f->Rshift | g << f->Gshift | g << f->Bshift
 				| a << f->Ashift;
 		}
+
+		if (!m_gameOverSurface)
+		{
+			m_gameOverFont.reset(TTF_OpenFont(k_gameOverFont.c_str(), 100));
+			SDL_assert(m_gameOverFont);
+			m_gameOverSurface.reset(TTF_RenderText_Solid(m_gameOverFont.get(),
+				"GAME OVER!", SDL_Color{ 0x20, 0x20, 0x20, 0xFF }));
+			SDL_assert(m_gameOverSurface);
+		}
+		SDL_Rect rect{ 
+			surface.w / 2 - m_gameOverSurface->w / 2,
+			surface.h / 2 - m_gameOverSurface->h / 2,
+			m_gameOverSurface->w,
+			m_gameOverSurface->h,
+		};
+		SDL_BlitSurface(m_gameOverSurface.get(), nullptr, &surface, &rect);
 	}
 }
 
@@ -167,10 +196,16 @@ void GameSurface::Create()
 
 	m_candlewick.Start();
 	m_scoreboard.Start();
+	m_gameOver = false;
 }
 
 void GameSurface::Destroy()
 {
+	m_gameOverSurface.reset();
+	m_gameOverFont.reset();
+	m_gems.clear();
+	m_candlewick.Stop();
+	m_scoreboard.Stop();
 	m_background.reset();
 }
 
@@ -264,13 +299,11 @@ void GameSurface::OnMouseMoveEvent(const SDL_Event& event)
 	}
 	for (auto& child : m_gems)
 	{
+		child.SetHover(false);
 		if (child.Contains(position))
 		{
-			if (child.IsHover())
-				child.SetHover(true);
+			child.SetHover(true);
 		}
-		else if (child.IsHover())
-			child.SetHover(false);
 	}
 }
 

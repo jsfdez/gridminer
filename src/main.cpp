@@ -42,13 +42,19 @@ int main(int, char**)
 		if (background)
 		{
 			window.reset(SDL_CreateWindow(
-				"Grid Miner", 
+				"Grid Miner by Jesus Fernandez (jsfdez@gmail.com). Press ESC to Quit", 
 				SDL_WINDOWPOS_UNDEFINED,
 				SDL_WINDOWPOS_UNDEFINED, 
 				background->w, 
 				background->h,
 				SDL_WINDOW_OPENGL)
 			);
+		}
+		else 
+		{ 
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Grid Miner",
+				"Cannot load data.", nullptr);
+			return EXIT_FAILURE;
 		}
 	}
 
