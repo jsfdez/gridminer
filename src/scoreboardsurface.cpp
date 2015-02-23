@@ -105,9 +105,21 @@ bool ScoreboardSurface::Contains(const Position&) const
 
 void ScoreboardSurface::AddScore(std::uint32_t points)
 {
-	char string[32];
 	m_score += points;
+	UpdateScore();
+}
+
+void ScoreboardSurface::Start()
+{
+	m_score = 0;
+	UpdateScore();
+	AbstractTimerSurface::Start();
+}
+
+void ScoreboardSurface::UpdateScore()
+{
+	char string[32];
 	sprintf_s(string, "%d", m_score);
-	m_scoreText.reset(TTF_RenderText_Solid(m_font.get(), string, 
+	m_scoreText.reset(TTF_RenderText_Solid(m_font.get(), string,
 		m_defaultColor));
 }

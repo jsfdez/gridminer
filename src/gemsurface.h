@@ -20,7 +20,6 @@ class GemSurface : public AbstractSurface
 	std::shared_ptr<SDL_Surface> m_image;
 	Position m_offset = Position(0, 0);
 	bool m_hover = false;
-	bool m_selected = false;
 	const GameSurface& m_game;
 	std::uint8_t m_fallIncrement = 10;
 	bool m_dragging = false;
@@ -60,8 +59,6 @@ public:
 	void SetHover(bool value);
 
 	bool IsEmpty() const;
-	bool IsSelected() const;
-	void SetSelected(bool value);
 	void Destroy(Destruction destruction);
 	bool IsDestroyed() const;
 

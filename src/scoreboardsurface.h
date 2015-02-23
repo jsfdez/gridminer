@@ -30,6 +30,10 @@ public:
 	virtual Status Update(const std::chrono::time_point<std::chrono::system_clock>& time) override;
 	virtual void Render(SDL_Surface& surface) override;
 	virtual bool Contains(const Position& position) const override;
+	virtual void Start() override;
 
 	void AddScore(std::uint32_t points);
+
+	void UpdateScore();
+
 };

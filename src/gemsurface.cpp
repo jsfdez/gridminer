@@ -123,28 +123,29 @@ void GemSurface::Render(SDL_Surface& surface)
 			loader::Animation::DESTRUCTION_VERTICAL);
 		sourceRect.x = WIDTH * (m_currentFrame + data.m_offset);
 	}
-	else if (IsHover() || IsSelected())
+	else if (IsHover())
 	{
-		auto copy = CloneSurface(true);
+		copy = CloneSurface(true);
 		const auto size = copy->w * copy->h;
 		const auto& format = *copy->format;
 		auto pixels = reinterpret_cast<std::uint32_t*>(copy->pixels);
 		for (std::remove_const<decltype(size)>::type i = 0; i < size; ++i)
 		{
-			if ((pixels[i] & format.Amask) == format.Amask && IsSelected())
-			{
-				pixels[i] &= format.Rmask | format.Gmask | format.Bmask;
-				pixels[i] |= 0xFF << format.Ashift;
-			}
-			else if (pixels[i] & format.Amask)
+			//if ((pixels[i] & format.Amask) == format.Amask)
+			//{
+			//	pixels[i] &= format.Rmask | format.Gmask | format.Bmask;
+			//	pixels[i] |= 0xFF << format.Ashift;
+			//}
+			/*else */
+			if (pixels[i] & format.Amask)
 			{
 				auto r = (pixels[i] & format.Rmask) >> format.Rshift;
 				auto g = (pixels[i] & format.Gmask) >> format.Gshift;
 				auto b = (pixels[i] & format.Bmask) >> format.Bshift;
 				auto a = (pixels[i] & format.Amask) >> format.Ashift;
-				r = (r + 0x80 > 0xFF) ? 0xff : r + 0x80;
-				g = (g + 0x80 > 0xFF) ? 0xff : g + 0x80;
-				b = (b + 0x80 > 0xFF) ? 0xff : b + 0x80;
+				r = (r + 0x40 > 0xFF) ? 0xff : r + 0x40;
+				g = (g + 0x40 > 0xFF) ? 0xff : g + 0x40;
+				b = (b + 0x40 > 0xFF) ? 0xff : b + 0x40;
 				pixels[i] = (r << format.Rshift)
 					+ (g << format.Gshift)
 					+ (b << format.Bshift)
@@ -192,16 +193,6 @@ bool GemSurface::IsHover() const
 void GemSurface::SetHover(bool value)
 {
 	m_hover = value;
-}
-
-bool GemSurface::IsSelected() const
-{
-	return m_selected;
-}
-
-void GemSurface::SetSelected(bool value)
-{
-	m_selected = value;
 }
 
 std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> 
