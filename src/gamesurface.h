@@ -42,6 +42,7 @@ class GameSurface : public AbstractSurface
 	std::set<std::vector<std::uint8_t>> m_destroyingGems;
 	CandlewickSurface m_candlewick;
 	ScoreboardSurface m_scoreboard;
+	bool m_gameOver = false;
 
 	enum class Direction
 	{

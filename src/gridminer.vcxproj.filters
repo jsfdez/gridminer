@@ -22,6 +22,9 @@
     <ClCompile Include="abstractsurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="abstracttimersurface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="candlewicksurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -48,7 +51,13 @@
     <ClInclude Include="abstractsurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="abstracttimersurface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="candlewicksurface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="files.h">

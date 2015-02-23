@@ -28,7 +28,9 @@ AbstractSurface::Status GameSurface::Update(const SDL_Event& event)
 {
 	auto status = Status::CONTINUE;
 
-	if (m_animation == Animation::NO_ANIMATION) switch (event.type)
+	if (m_gameOver)
+		status = Status::EXIT;
+	else if (m_animation == Animation::NO_ANIMATION) switch (event.type)
 	{
 	case SDL_MOUSEMOTION:
 		OnMouseMoveEvent(event);
@@ -88,8 +90,13 @@ AbstractSurface::Status GameSurface::Update(
 			m_selectedGem = k_noGem;
 		}
 	}
-	m_candlewick.Update(time);
-	m_scoreboard.Update(time);
+	{
+		m_candlewick.Update(time);
+		if (m_scoreboard.Update(time) == AbstractSurface::Status::EXIT)
+		{
+			m_gameOver = true;
+		}
+	}
 	return status;
 }
 
@@ -109,6 +116,22 @@ void GameSurface::Render(SDL_Surface& surface)
 	std::for_each(postponed.begin(), postponed.end(), bind);
 	m_candlewick.Render(surface);
 	m_scoreboard.Render(surface);
+	if (m_gameOver)
+	{
+		auto pixels = static_cast<std::uint32_t*>(surface.pixels);
+		SDL_assert(surface.format->BytesPerPixel == 4);
+		for (auto i = 0; i < surface.w * surface.h; ++i)
+		{
+			auto f = surface.format;
+			std::uint8_t r, g, b, a;
+			SDL_GetRGBA(pixels[i], surface.format, &r, &g, &b, &a);
+			r = static_cast<std::uint16_t>(r + 0x20) > 0xFF ? 0xFF : r + 0x20;
+			g = static_cast<std::uint16_t>(r + 0x20) > 0xFF ? 0xFF : g + 0x20;
+			b = static_cast<std::uint16_t>(r + 0x20) > 0xFF ? 0xFF : b + 0x20;
+			pixels[i] = r << f->Rshift | g << f->Gshift | g << f->Bshift
+				| a << f->Ashift;
+		}
+	}
 }
 
 void GameSurface::Create()
@@ -141,6 +164,9 @@ void GameSurface::Create()
 	} while (!sets.empty());
 	m_animation = Animation::FALL_ANIMATION;
 	SDL_Log("Acceptable grid found in %d iterations", times);
+
+	m_candlewick.Start();
+	m_scoreboard.Start();
 }
 
 void GameSurface::Destroy()
@@ -389,6 +415,7 @@ void GameSurface::StartDestruction()
 		auto diff = group[1] - group[0];
 		for (auto& i : group)
 		{
+			m_scoreboard.AddScore(10);
 			m_gems[i].Destroy(diff == 1
 				? GemSurface::Destruction::HORIZONTAL
 				: GemSurface::Destruction::VERTICAL);

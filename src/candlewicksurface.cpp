@@ -4,6 +4,7 @@
 
 #include "files.h"
 #include "loader.h"
+#include "constants.h"
 
 CandlewickSurface::CandlewickSurface(const GameSurface& game)
 	: m_game(game)
@@ -22,14 +23,26 @@ CandlewickSurface::Status CandlewickSurface::Update(const SDL_Event&)
 }
 
 CandlewickSurface::Status CandlewickSurface::Update(
-	const std::chrono::time_point<std::chrono::system_clock>&)
+	const std::chrono::time_point<std::chrono::system_clock>& time)
 {
-	m_frame = (m_frame + 1) % m_path.size();
-	return Status::CONTINUE;
+	auto ret = AbstractTimerSurface::Update(time);
+	if (m_started && m_running)
+	{
+		auto diff = time - m_startTime;
+		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+		auto position = ms.count() / (constants::MAX_TIME * 1000.);
+		m_frame = static_cast<decltype(m_frame)>(m_path.size() * position);
+	}
+	else 
+		m_frame = 0;
+	return ret;
 }
 
 void CandlewickSurface::Render(SDL_Surface& surface)
 {
+	if (!m_running) 
+		return;
+
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	auto Rmask = 0xff000000;
 	auto Gmask = 0x00ff0000;

@@ -1,26 +1,28 @@
 #pragma once
 
-#include "abstractsurface.h"
+#include "AbstractTimerSurface.h"
 
 #include <chrono>
+#include <memory>
 #include <cstdint>
+#include <SDL_ttf.h>
 
 class GameSurface;
 
-class ScoreboardSurface : public AbstractSurface
+class ScoreboardSurface : public AbstractTimerSurface
 {
-	std::chrono::system_clock::time_point m_startTime;
-	bool m_started = false;
-	bool m_running = false;
 	std::uint32_t m_score = 0;
 	const GameSurface& m_game;
+	std::unique_ptr<TTF_Font, decltype(TTF_CloseFont)*> m_titleFont;
+	std::unique_ptr<TTF_Font, decltype(TTF_CloseFont)*> m_font;
+	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> m_title;
+	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> m_timeTitle;
+	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> m_timeText;
+	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> m_scoreTitle;
+	std::unique_ptr<SDL_Surface, decltype(SDL_FreeSurface)*> m_scoreText;
+	const SDL_Color m_defaultColor;
 
 public:
-	enum Constants
-	{
-		MAX_TIME = 60,
-	};
-
 	ScoreboardSurface(GameSurface& gameSurface);
 	~ScoreboardSurface();
 
@@ -29,6 +31,5 @@ public:
 	virtual void Render(SDL_Surface& surface) override;
 	virtual bool Contains(const Position& position) const override;
 
-	void Start();
-	void Stop();
+	void AddScore(std::uint32_t points);
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "abstractsurface.h"
+#include "abstracttimersurface.h"
 
 #include <SDL.h>
 #include <vector>
@@ -10,7 +10,7 @@
 
 class GameSurface;
 
-class CandlewickSurface : public AbstractSurface
+class CandlewickSurface : public AbstractTimerSurface
 {
 	const GameSurface& m_game;
 	std::vector<Position> m_path;
